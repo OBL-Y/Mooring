@@ -1,0 +1,32 @@
+name: Feature request
+description: Suggest something Mooring should do.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please check the [Roadmap](https://github.com/OBL-Y/Mooring#roadmap) first; your idea may already be planned.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What gets in your way today? Describing the problem is more useful than a finished design.
+      placeholder: When I open Outlook after redocking, its window stays on the laptop screen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Your idea
+      description: How you'd like Mooring to handle it, if you have one in mind.
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Which systems does this matter on?
+      multiple: true
+      options:
+        - Windows
+        - macOS

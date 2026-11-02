@@ -60,7 +60,7 @@ Windows has been tested on real docks. macOS still needs testing.
 ### 3. Make it open-source friendly
 
 - [x] Add `CONTRIBUTING.md`.
-- [ ] Add a code of conduct and issue templates (bug report: OS version, monitor setup, logs).
+- [x] Add a code of conduct and issue templates (bug report: OS version, monitor setup, logs).
 - [ ] Label starter tasks as `good first issue`.
 - [x] Add a screenshot of the Settings window to this README.
 - [ ] Add a short GIF of a before/after restore (needs a screen recording on a real dock).
@@ -160,6 +160,8 @@ scripts/screenshot.swift Renders the Settings screenshots in docs/images
 Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to pick an item from [step 1 of the Roadmap](#1-test-on-real-hardware-needed-for-v010), try it, and open an issue with what happened.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
+
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## Releasing
 

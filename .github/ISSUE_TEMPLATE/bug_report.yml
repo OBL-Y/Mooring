@@ -1,0 +1,88 @@
+name: Bug report
+description: Windows didn't go back where they were, or something else went wrong.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. The more we know about your screens, the faster we can find the problem.
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows 11
+        - Windows 10
+        - macOS
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS version
+      description: "Windows: Settings › System › About (e.g. 24H2, build 26100). macOS: Apple menu › About This Mac (e.g. 15.4)."
+      placeholder: "Windows 11 24H2 (26100.4061)"
+    validations:
+      required: true
+
+  - type: input
+    id: mooring-version
+    attributes:
+      label: Mooring version
+      description: The release you installed, from the Releases page or the installer's file name.
+      placeholder: "v0.1.0-beta.3"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screens
+    attributes:
+      label: Monitor setup
+      description: |
+        List the laptop screen and each monitor with its resolution and scaling, and how they connect (dock model, USB-C, HDMI).
+        Windows: Settings › System › Display. macOS: System Settings › Displays.
+      placeholder: |
+        Laptop: 1920×1200 at 150%
+        Left: Dell U2723QE 3840×2160 at 150%, via Lenovo USB-C dock
+        Right: 2560×1440 at 100%, via the same dock
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: What you did
+      description: For example, "undocked, closed the lid, redocked an hour later".
+      placeholder: |
+        1. Arranged windows across both monitors
+        2. Undocked and used the laptop for an hour
+        3. Redocked
+    validations:
+      required: true
+
+  - type: textarea
+    id: result
+    attributes:
+      label: What happened, and what you expected
+      description: Which windows went to the wrong place (app names are enough), and where they should have gone.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Attach the latest log file or paste the lines from around the time it went wrong.
+        Windows: `%LOCALAPPDATA%\io.github.obl-y.mooring\logs`
+        macOS: `~/Library/Logs/io.github.obl-y.mooring`
+        Logs can include window titles, so check them for anything private first.
+      render: text
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: Screenshots, `layouts.json` (check it for private window titles first), or other details.

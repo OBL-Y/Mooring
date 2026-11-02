@@ -2,11 +2,13 @@
 
 Thanks for helping. Mooring is small, and every bug report, test on a new dock setup, and pull request makes a real difference.
 
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
 The most useful thing right now is testing on real hardware. Pick an open item from [step 1 of the Roadmap](README.md#1-test-on-real-hardware-needed-for-v010), try it, and open an issue with what happened. That counts even if it all worked.
 
 ## Reporting a bug
 
-[Open an issue](https://github.com/OBL-Y/Mooring/issues/new) and include:
+[Open a bug report](https://github.com/OBL-Y/Mooring/issues/new?template=bug_report.yml). The form asks for:
 
 - **Your system:** Windows 10, Windows 11, or the macOS version, plus the Mooring version (from the release you installed).
 - **Your screens:** the laptop screen and each monitor, with resolution and scaling (for example "laptop 1920×1200 at 150%, two 2560×1440 at 100% over USB-C dock").
@@ -18,7 +20,7 @@ If it's about where windows ended up, the saved layouts help too: `layouts.json`
 
 ## Suggesting a feature
 
-Check the [Roadmap](README.md#roadmap) first. If your idea isn't there, open an issue that says what problem it solves for you. That's easier to discuss than a finished design.
+Check the [Roadmap](README.md#roadmap) first. If your idea isn't there, [open a feature request](https://github.com/OBL-Y/Mooring/issues/new?template=feature_request.yml) that says what problem it solves for you. That's easier to discuss than a finished design.
 
 ## Working on the code
 
