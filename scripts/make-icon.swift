@@ -1,4 +1,4 @@
-// Draws Mooring's app icon and tray icon.
+// Draws Mooring's app icon and tray icon: an anchor with a window as its stock.
 // Usage: swift scripts/make-icon.swift <output dir>
 import AppKit
 
@@ -11,7 +11,7 @@ func render(size: Int, _ draw: (CGContext, CGFloat) -> Void) -> Data {
     NSGraphicsContext.saveGraphicsState()
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     let ctx = NSGraphicsContext.current!.cgContext
-    // Flip so y grows downwards, like the designs below.
+    // Flip so y grows downwards, matching the 100×100 design grid below.
     ctx.translateBy(x: 0, y: CGFloat(size))
     ctx.scaleBy(x: 1, y: -1)
     draw(ctx, CGFloat(size))
@@ -19,66 +19,85 @@ func render(size: Int, _ draw: (CGContext, CGFloat) -> Void) -> Data {
     return rep.representation(using: .png, properties: [:])!
 }
 
-/// Two windows resting on a dock, with a mooring line to a bollard.
-func drawMark(_ ctx: CGContext, unit u: CGFloat, color: CGColor, cutout: CGColor?) {
-    ctx.setFillColor(color)
-    ctx.setStrokeColor(color)
-    // Back window
-    let back = CGRect(x: 30 * u, y: 22 * u, width: 40 * u, height: 30 * u)
-    ctx.addPath(CGPath(roundedRect: back, cornerWidth: 4 * u, cornerHeight: 4 * u, transform: nil))
-    ctx.fillPath()
-    // Front window, with a gap around it so the two read as separate windows
-    let front = CGRect(x: 18 * u, y: 34 * u, width: 44 * u, height: 32 * u)
-    if let cutout {
-        ctx.setFillColor(cutout)
-        ctx.addPath(CGPath(roundedRect: front.insetBy(dx: -3 * u, dy: -3 * u), cornerWidth: 6 * u, cornerHeight: 6 * u, transform: nil))
-        ctx.fillPath()
-        ctx.setFillColor(color)
-    } else {
-        ctx.setBlendMode(.clear)
-        ctx.addPath(CGPath(roundedRect: front.insetBy(dx: -3 * u, dy: -3 * u), cornerWidth: 6 * u, cornerHeight: 6 * u, transform: nil))
-        ctx.fillPath()
-        ctx.setBlendMode(.normal)
-    }
-    ctx.addPath(CGPath(roundedRect: front, cornerWidth: 4 * u, cornerHeight: 4 * u, transform: nil))
-    ctx.fillPath()
-    // Dock
-    ctx.addPath(CGPath(roundedRect: CGRect(x: 12 * u, y: 72 * u, width: 76 * u, height: 7 * u), cornerWidth: 3.5 * u, cornerHeight: 3.5 * u, transform: nil))
-    ctx.fillPath()
-    // Bollard
-    ctx.addPath(CGPath(roundedRect: CGRect(x: 74 * u, y: 60 * u, width: 9 * u, height: 14 * u), cornerWidth: 3 * u, cornerHeight: 3 * u, transform: nil))
-    ctx.fillPath()
-    // Mooring line
-    ctx.setLineWidth(3 * u)
-    ctx.setLineCap(.round)
-    ctx.move(to: CGPoint(x: 62 * u, y: 50 * u))
-    ctx.addQuadCurve(to: CGPoint(x: 78.5 * u, y: 62 * u), control: CGPoint(x: 74 * u, y: 48 * u))
-    ctx.strokePath()
-}
+let white = CGColor(gray: 1, alpha: 1)
+let navy = CGColor(red: 0x0C / 255, green: 0x44 / 255, blue: 0x7C / 255, alpha: 1)
+let paleBlue = CGColor(red: 0xB5 / 255, green: 0xD4 / 255, blue: 0xF4 / 255, alpha: 1)
 
-// App icon: 1024px, rounded square with a deep-water gradient.
-let icon = render(size: 1024) { ctx, s in
-    let inset = s * 0.09
-    let rect = CGRect(x: inset, y: inset, width: s - 2 * inset, height: s - 2 * inset)
-    let shape = CGPath(roundedRect: rect, cornerWidth: rect.width * 0.225, cornerHeight: rect.width * 0.225, transform: nil)
+/// The anchor, on a 100×100 grid. `weight` thickens strokes for tiny sizes.
+/// With `titleBar` nil the title bar is cut out (for one-colour template images).
+func drawAnchor(_ ctx: CGContext, color: CGColor, titleBar: CGColor?, weight: CGFloat = 1) {
+    ctx.setStrokeColor(color)
+    ctx.setFillColor(color)
+    ctx.setLineCap(.round)
+
+    // Ring
+    ctx.setLineWidth(4.5 * weight)
+    ctx.strokeEllipse(in: CGRect(x: 44, y: 14, width: 12, height: 12))
+
+    // Shank, above and below the window
+    ctx.setLineWidth(5 * weight)
+    ctx.setLineCap(.butt)
+    ctx.move(to: CGPoint(x: 50, y: 26)); ctx.addLine(to: CGPoint(x: 50, y: 35))
+    ctx.move(to: CGPoint(x: 50, y: 60)); ctx.addLine(to: CGPoint(x: 50, y: 82))
+    ctx.strokePath()
+
+    // Arms
+    ctx.setLineCap(.round)
+    ctx.move(to: CGPoint(x: 22, y: 62))
+    ctx.addQuadCurve(to: CGPoint(x: 50, y: 84), control: CGPoint(x: 24, y: 84))
+    ctx.addQuadCurve(to: CGPoint(x: 78, y: 62), control: CGPoint(x: 76, y: 84))
+    ctx.strokePath()
+
+    // Flukes
+    let w = weight
+    for x in [22.0, 78.0] as [CGFloat] {
+        ctx.move(to: CGPoint(x: x - 6 * w, y: 66))
+        ctx.addLine(to: CGPoint(x: x, y: 56 - 2 * (w - 1)))
+        ctx.addLine(to: CGPoint(x: x + 6 * w, y: 66))
+        ctx.closePath()
+    }
+    ctx.fillPath()
+
+    // Window as the stock, with a title bar
+    let window = CGRect(x: 30, y: 34, width: 40, height: 27)
+    let shape = CGPath(roundedRect: window, cornerWidth: 4, cornerHeight: 4, transform: nil)
+    ctx.addPath(shape)
+    ctx.fillPath()
     ctx.saveGState()
     ctx.addPath(shape)
     ctx.clip()
-    let colors = [CGColor(red: 0.13, green: 0.55, blue: 0.66, alpha: 1), CGColor(red: 0.04, green: 0.20, blue: 0.33, alpha: 1)]
-    let gradient = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: [0, 1])!
-    ctx.drawLinearGradient(gradient, start: CGPoint(x: 0, y: inset), end: CGPoint(x: 0, y: s - inset), options: [])
-    ctx.restoreGState()
-
-    ctx.saveGState()
-    let u = rect.width / 100
-    ctx.translateBy(x: rect.minX, y: rect.minY + 2 * u)
-    drawMark(ctx, unit: u, color: CGColor(gray: 1, alpha: 1), cutout: nil)
+    let bar = CGRect(x: 30, y: 34, width: 40, height: 7 * weight)
+    if let titleBar {
+        ctx.setFillColor(titleBar)
+        ctx.fill(bar)
+    } else {
+        ctx.setBlendMode(.clear)
+        ctx.fill(bar.insetBy(dx: 3 * weight, dy: 0).offsetBy(dx: 0, dy: 2.5 * weight).intersection(window.insetBy(dx: 3 * weight, dy: 2.5 * weight)))
+    }
     ctx.restoreGState()
 }
 
-// Tray icon: black template image (macOS tints it for light/dark menu bars).
+// App icon: 1024px rounded square in deep blue. The design grid's
+// background square (4…96) maps onto the standard macOS icon area.
+let icon = render(size: 1024) { ctx, s in
+    let inset = s * 0.09
+    let rect = CGRect(x: inset, y: inset, width: s - 2 * inset, height: s - 2 * inset)
+    ctx.addPath(CGPath(roundedRect: rect, cornerWidth: rect.width * 0.225, cornerHeight: rect.width * 0.225, transform: nil))
+    ctx.setFillColor(navy)
+    ctx.fillPath()
+
+    let u = rect.width / 92
+    ctx.translateBy(x: inset - 4 * u, y: inset - 4 * u)
+    ctx.scaleBy(x: u, y: u)
+    drawAnchor(ctx, color: white, titleBar: paleBlue)
+}
+
+// Tray icon: black template image (macOS tints it for light and dark menu bars).
 let tray = render(size: 44) { ctx, s in
-    drawMark(ctx, unit: s / 100 * 1.1, color: CGColor(gray: 0, alpha: 1), cutout: nil)
+    let u = s / 78
+    ctx.translateBy(x: s / 2 - 50 * u, y: s / 2 - 50 * u)
+    ctx.scaleBy(x: u, y: u)
+    drawAnchor(ctx, color: CGColor(gray: 0, alpha: 1), titleBar: nil, weight: 1.35)
 }
 
 try! FileManager.default.createDirectory(at: outDir, withIntermediateDirectories: true)
