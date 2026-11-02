@@ -80,3 +80,6 @@ input[type="checkbox"][role="switch"]::after {
 input[type="checkbox"][role="switch"]:checked { background: var(--accent); }
 input[type="checkbox"][role="switch"]:checked::after { transform: translateX(16px); }
 input:focus-visible, button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Classes like .banner and .row set display, which would otherwise override the hidden attribute. */
+[hidden] { display: none !important; }
