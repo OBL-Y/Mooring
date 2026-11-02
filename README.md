@@ -34,8 +34,8 @@ The code compiles on both systems, but none of this has been tried on a real doc
 - [ ] **Windows:** maximized windows move to the right monitor and stay maximized.
 - [ ] **Windows:** monitors with different scaling (e.g. 150% laptop with a 100% monitor) still get exact positions.
 - [ ] **Windows:** desktop icons restore (with "Auto arrange icons" off).
-- [ ] **Windows installer:** "Only for me" installs without an admin prompt.
-- [ ] **Windows installer:** "Everyone" asks for admin and installs to Program Files.
+- [x] **Windows installer:** a standard account (or saying No to the admin prompt) installs just for that user.
+- [ ] **Windows installer:** running as administrator shows the choice, and "Anyone who uses this computer" installs to Program Files.
 - [ ] **Windows installer:** the Start menu entry and the desktop shortcut are created.
 - [ ] **Windows installer:** uninstall removes the app and the startup entry.
 - [ ] **Run at startup / Open at login:** on by default after first run, and turning it off in Settings or the tray menu works.
@@ -71,7 +71,7 @@ There's no release yet. Once there is, installers will be on the [Releases](http
 ### Windows
 
 1. Run `Mooring_x.y.z_x64-setup.exe`.
-2. Choose **Only for me** (no admin rights; installs to `%LOCALAPPDATA%\Programs\Mooring`) or **Anyone who uses this computer** (needs admin; installs to `C:\Program Files\Mooring`).
+2. If Windows asks whether to let the installer make changes, choose **Yes** to get a choice between **Only for me** (installs to `%LOCALAPPDATA%\Programs\Mooring`) and **Anyone who uses this computer** (installs to `C:\Program Files\Mooring`). If you choose **No**, or your account isn't an administrator, that page is skipped and Mooring installs just for you, with no admin rights needed. To install for everyone from a standard account, right-click the installer › **Run as administrator**.
 3. On the last page, leave **Create desktop shortcut** ticked if you want one.
 
 For a silent install, run the installer with `/S`.
