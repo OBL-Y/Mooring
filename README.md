@@ -223,6 +223,8 @@ For maintainers:
 3. The **Release** workflow builds the Windows installer and a universal macOS DMG and attaches them to a **draft** release.
 4. Download and test both installers, then publish the release.
 
+For test builds, use a tag with a suffix, such as `v0.1.0-beta.1`. These are published straight away as a **pre-release**, so testers can download the installers without signing in.
+
 To sign the Mac build, add these repository secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and `APPLE_TEAM_ID`. For Windows signing, see the [Tauri Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
 
 ## License

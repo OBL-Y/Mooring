@@ -1,6 +1,8 @@
 name: Release
 
-# Push a tag like v0.1.0 to build installers and attach them to a draft GitHub release.
+# Push a tag to build the Windows and macOS installers and attach them to a GitHub release:
+#   v0.1.0-beta.1  -> published pre-release (for testing)
+#   v0.1.0         -> draft release (check, then publish by hand)
 on:
   push:
     tags: ["v*"]
@@ -21,8 +23,8 @@ jobs:
             args: ""
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: lts/*
       - uses: dtolnay/rust-toolchain@stable
@@ -46,5 +48,8 @@ jobs:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
           releaseName: Mooring ${{ github.ref_name }}
           releaseBody: See the assets below to download and install Mooring.
-          releaseDraft: true
+          # Test tags like v0.1.0-beta.1 publish straight away as a pre-release;
+          # version tags like v0.1.0 make a draft to check before publishing.
+          releaseDraft: ${{ !contains(github.ref_name, '-') }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}
