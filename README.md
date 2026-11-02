@@ -44,7 +44,10 @@ The code compiles on both systems, but none of this has been tried on a real doc
 ### 2. Make it trustworthy to install (needed for v0.1.0)
 
 - [ ] **macOS signing:** sign and notarize the Mac build with an Apple Developer ID. Without it, Gatekeeper blocks the app. The release workflow is already wired for the secrets listed under [Releasing](#releasing).
-- [x] **Windows signing:** sign the Windows installer, for example with Azure Trusted Signing or a code-signing certificate. Without it, SmartScreen shows a warning.
+- [ ] **Windows signing:** sign the Windows installer. Without it, SmartScreen shows a warning. The plan is to use [SignPath Foundation](https://signpath.org/), which signs open-source projects for free:
+  - [ ] Apply to SignPath Foundation with this repo (needs multi-factor login on GitHub and SignPath).
+  - [ ] Once approved, add SignPath's GitHub Action to the release workflow so it signs the Windows build.
+  - Until then, Windows releases ship unsigned, and testers click **More info › Run anyway**.
 - [ ] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
 
 ### 3. Make it open-source friendly
