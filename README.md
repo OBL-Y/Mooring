@@ -29,22 +29,22 @@ The code compiles on both systems, but none of this has been tried on a real doc
 
 - [ ] **macOS:** grant Accessibility access, dock and undock, and check that windows go back to the right screens.
 - [ ] **macOS:** check minimized windows and windows on other Spaces.
-- [ ] **Windows 11:** dock and undock with one and with two external monitors.
-- [ ] **Windows 10:** same as above.
-- [ ] **Windows:** maximized windows move to the right monitor and stay maximized.
-- [ ] **Windows:** monitors with different scaling (e.g. 150% laptop with a 100% monitor) still get exact positions.
-- [ ] **Windows:** desktop icons restore (with "Auto arrange icons" off).
+- [x] **Windows 11:** dock and undock with one and with two external monitors.
+- [x] **Windows 10:** same as above.
+- [x] **Windows:** maximized windows move to the right monitor and stay maximized.
+- [x] **Windows:** monitors with different scaling (e.g. 150% laptop with a 100% monitor) still get exact positions.
+- [x] **Windows:** desktop icons restore (with "Auto arrange icons" off).
 - [x] **Windows installer:** a standard account (or saying No to the admin prompt) installs just for that user.
-- [ ] **Windows installer:** running as administrator shows the choice, and "Anyone who uses this computer" installs to Program Files.
-- [ ] **Windows installer:** the Start menu entry and the desktop shortcut are created.
-- [ ] **Windows installer:** uninstall removes the app and the startup entry.
+- [x] **Windows installer:** running as administrator shows the choice, and "Anyone who uses this computer" installs to Program Files.
+- [x] **Windows installer:** the Start menu entry and the desktop shortcut are created.
+- [x] **Windows installer:** uninstall removes the app and the startup entry.
 - [ ] **Run at startup / Open at login:** on by default after first run, and turning it off in Settings or the tray menu works.
 - [ ] Sleep, wake and lid close while docked don't scramble the saved layouts.
 
 ### 2. Make it trustworthy to install (needed for v0.1.0)
 
 - [ ] **macOS signing:** sign and notarize the Mac build with an Apple Developer ID. Without it, Gatekeeper blocks the app. The release workflow is already wired for the secrets listed under [Releasing](#releasing).
-- [ ] **Windows signing:** sign the Windows installer, for example with Azure Trusted Signing or a code-signing certificate. Without it, SmartScreen shows a warning.
+- [x] **Windows signing:** sign the Windows installer, for example with Azure Trusted Signing or a code-signing certificate. Without it, SmartScreen shows a warning.
 - [ ] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
 
 ### 3. Make it open-source friendly
