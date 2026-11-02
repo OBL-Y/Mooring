@@ -1,0 +1,15 @@
+{
+  "name": "mooring",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Puts your windows back where they were when you redock your laptop.",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "icons": "swift scripts/make-icon.swift src-tauri/icons && tauri icon src-tauri/icons/source.png"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}

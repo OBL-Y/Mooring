@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mooring</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main>
+    <header>
+      <img src="icon.png" alt="" width="48" height="48">
+      <div>
+        <h1>Mooring</h1>
+        <p class="muted" id="current">Looking at your displays…</p>
+      </div>
+    </header>
+
+    <section id="permission" class="banner" hidden>
+      <div>
+        <strong>Mooring needs Accessibility access to move windows.</strong>
+        <p>Open System Settings › Privacy &amp; Security › Accessibility and turn on Mooring.</p>
+      </div>
+      <button id="grant">Open Settings</button>
+    </section>
+
+    <section class="actions">
+      <button id="restore" class="primary">Restore Windows Now</button>
+      <button id="save">Save Current Layout</button>
+    </section>
+    <p class="muted status" id="event" aria-live="polite"></p>
+
+    <h2>Behaviour</h2>
+    <section class="group">
+      <label class="row">
+        <span>
+          <span class="title">Restore automatically</span>
+          <span class="hint">Put windows back when you dock or undock.</span>
+        </span>
+        <input type="checkbox" id="auto_restore" role="switch">
+      </label>
+      <label class="row">
+        <span>
+          <span class="title">Also restore when undocking</span>
+          <span class="hint">Use the laptop-only layout when external displays are removed.</span>
+        </span>
+        <input type="checkbox" id="restore_on_undock" role="switch">
+      </label>
+      <label class="row" id="icons-row" hidden>
+        <span>
+          <span class="title">Restore desktop icons</span>
+          <span class="hint">Keep desktop icons in the order they were. Turn off “Auto arrange icons” on the desktop.</span>
+        </span>
+        <input type="checkbox" id="restore_desktop_icons" role="switch">
+      </label>
+      <label class="row">
+        <span>
+          <span class="title" id="login-title">Run at startup</span>
+          <span class="hint">Start Mooring quietly in the background when you sign in.</span>
+        </span>
+        <input type="checkbox" id="launch_at_login" role="switch">
+      </label>
+      <label class="row">
+        <span>
+          <span class="title">Wait before restoring</span>
+          <span class="hint">Gives displays time to finish waking up.</span>
+        </span>
+        <select id="settle_delay_secs">
+          <option value="2">2 seconds</option>
+          <option value="3">3 seconds</option>
+          <option value="5">5 seconds</option>
+          <option value="8">8 seconds</option>
+          <option value="12">12 seconds</option>
+        </select>
+      </label>
+    </section>
+
+    <h2>Saved Layouts</h2>
+    <p class="muted">Mooring saves a layout for each display setup and keeps it up to date. Lock a layout to stop it changing.</p>
+    <section class="group" id="layouts"></section>
+  </main>
+  <script src="main.js"></script>
+</body>
+</html>
