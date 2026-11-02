@@ -81,7 +81,8 @@ To restore desktop icons, right-click the desktop › View and turn off **Auto a
 ### macOS
 
 1. Open `Mooring_x.y.z_universal.dmg` and drag Mooring to Applications.
-2. Open Mooring. When asked, turn it on under **System Settings › Privacy & Security › Accessibility**. Moving other apps' windows isn't possible without this.
+2. Open Mooring. Until builds are notarized, macOS will say it can't check the app. Go to **System Settings › Privacy & Security**, scroll down, and click **Open Anyway**. You only need to do this once.
+3. When asked, turn Mooring on under **System Settings › Privacy & Security › Accessibility**. Moving other apps' windows isn't possible without this.
 
 ### Settings
 
