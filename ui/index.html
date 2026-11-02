@@ -24,6 +24,14 @@
       <button id="grant">Open Settings</button>
     </section>
 
+    <section id="update-banner" class="banner info" hidden>
+      <div>
+        <strong id="update-banner-title">A new version of Mooring is available.</strong>
+        <p id="update-banner-notes"></p>
+      </div>
+      <button id="update-banner-install" class="primary">Install and Restart</button>
+    </section>
+
     <section class="actions">
       <button id="restore" class="primary">Restore Windows Now</button>
       <button id="save">Save Current Layout</button>
@@ -72,6 +80,24 @@
           <option value="8">8 seconds</option>
           <option value="12">12 seconds</option>
         </select>
+      </label>
+    </section>
+
+    <h2>Updates</h2>
+    <section class="group">
+      <div class="row">
+        <span>
+          <span class="title" id="update-title">Mooring</span>
+          <span class="hint" id="update-hint" aria-live="polite"></span>
+        </span>
+        <button id="update-action">Check Now</button>
+      </div>
+      <label class="row">
+        <span>
+          <span class="title">Check for updates automatically</span>
+          <span class="hint">When Mooring starts and once a day after that.</span>
+        </span>
+        <input type="checkbox" id="check_for_updates" role="switch">
       </label>
     </section>
 

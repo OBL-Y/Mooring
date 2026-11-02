@@ -3,18 +3,26 @@ mod model;
 mod platform;
 mod settings;
 mod store;
+mod updater;
 
 use engine::{Engine, RestoreReport, Status};
 use serde::{Deserialize, Serialize};
 use settings::Settings;
 use std::sync::Arc;
+use std::time::Duration;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, State, WindowEvent, Wry};
 use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
+use updater::{UpdateView, Updates};
 
 /// Passed by the login item / startup entry so Mooring starts quietly in the tray.
 const AUTOSTART_ARG: &str = "--autostart";
+
+/// How long after start-up to wait before the first update check, so the network is up.
+const FIRST_UPDATE_CHECK: Duration = Duration::from_secs(15);
+/// How often a long-running Mooring looks for updates again.
+const UPDATE_CHECK_INTERVAL: Duration = Duration::from_secs(24 * 60 * 60);
 
 #[cfg(target_os = "macos")]
 const LOGIN_LABEL: &str = "Open at Login";
@@ -29,10 +37,11 @@ struct SettingsView {
     launch_at_login: bool,
 }
 
-/// Tray check items, kept so the settings window and the tray stay in sync.
+/// Tray items that change, kept so the settings window and the tray stay in sync.
 struct TrayChecks {
     auto_restore: CheckMenuItem<Wry>,
     launch_at_login: CheckMenuItem<Wry>,
+    update: MenuItem<Wry>,
 }
 
 fn settings_view(app: &AppHandle, engine: &Engine) -> SettingsView {
@@ -52,6 +61,29 @@ fn sync_tray(app: &AppHandle) {
     let view = settings_view(app, &engine);
     let _ = checks.auto_restore.set_checked(view.settings.auto_restore);
     let _ = checks.launch_at_login.set_checked(view.launch_at_login);
+}
+
+fn sync_update_item(app: &AppHandle) {
+    let Some(checks) = app.try_state::<TrayChecks>() else {
+        return;
+    };
+    let text = match app.state::<Updates>().available_version() {
+        Some(version) => format!("Install Update ({version})…"),
+        None => "Check for Updates…".to_string(),
+    };
+    let _ = checks.update.set_text(text);
+}
+
+/// Checks for an update and updates the tray. With `announce`, opens Settings
+/// the first time a new version is found, so people see it without looking.
+async fn run_update_check(app: &AppHandle, announce: bool) {
+    let found = updater::check(app).await.ok().flatten();
+    sync_update_item(app);
+    if let Some(version) = found {
+        if announce && app.state::<Updates>().first_announcement(&version) {
+            show_settings(app);
+        }
+    }
 }
 
 fn set_launch_at_login(app: &AppHandle, enabled: bool) -> Result<(), String> {
@@ -119,6 +151,22 @@ fn request_permission() {
     platform::request_permission();
 }
 
+#[tauri::command]
+fn get_update(app: AppHandle, updates: State<'_, Updates>) -> UpdateView {
+    updates.view(&app)
+}
+
+#[tauri::command]
+async fn check_update(app: AppHandle) -> UpdateView {
+    run_update_check(&app, false).await;
+    app.state::<Updates>().view(&app)
+}
+
+#[tauri::command]
+async fn install_update(app: AppHandle) -> Result<(), String> {
+    updater::install(&app).await
+}
+
 fn show_settings(app: &AppHandle) {
     if let Some(window) = app.get_webview_window("settings") {
         let _ = window.unminimize();
@@ -149,6 +197,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
         view.launch_at_login,
         None::<&str>,
     )?;
+    let update = MenuItem::with_id(app, "update", "Check for Updates…", true, None::<&str>)?;
     let settings = MenuItem::with_id(app, "settings", "Settings…", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit Mooring", true, None::<&str>)?;
     let menu = Menu::with_items(
@@ -160,6 +209,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
             &auto_restore,
             &launch_at_login,
             &PredefinedMenuItem::separator(app)?,
+            &update,
             &settings,
             &quit,
         ],
@@ -167,6 +217,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
     app.manage(TrayChecks {
         auto_restore,
         launch_at_login,
+        update,
     });
 
     let builder = TrayIconBuilder::with_id("main")
@@ -211,6 +262,18 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
                     }
                     sync_tray(app);
                 }
+                "update" => {
+                    // Settings shows the progress and the result.
+                    show_settings(app);
+                    let app = app.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if app.state::<Updates>().available_version().is_some() {
+                            let _ = updater::install(&app).await;
+                        } else {
+                            run_update_check(&app, false).await;
+                        }
+                    });
+                }
                 "settings" => show_settings(app),
                 "quit" => app.exit(0),
                 _ => {}
@@ -231,6 +294,7 @@ pub fn run() {
             MacosLauncher::LaunchAgent,
             Some(vec![AUTOSTART_ARG]),
         ))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
                 .level(log::LevelFilter::Info)
@@ -253,8 +317,21 @@ pub fn run() {
 
             let engine = Engine::new(dir, settings);
             engine.start();
-            app.manage(engine);
+            app.manage(Arc::clone(&engine));
+            app.manage(Updates::default());
             build_tray(app.handle())?;
+
+            // Look for updates shortly after start-up, then once a day.
+            let handle = app.handle().clone();
+            std::thread::spawn(move || {
+                std::thread::sleep(FIRST_UPDATE_CHECK);
+                loop {
+                    if engine.settings().check_for_updates {
+                        tauri::async_runtime::block_on(run_update_check(&handle, true));
+                    }
+                    std::thread::sleep(UPDATE_CHECK_INTERVAL);
+                }
+            });
 
             let quiet_start = std::env::args().any(|a| a == AUTOSTART_ARG);
             let needs_permission = !platform::has_permission();
@@ -282,6 +359,9 @@ pub fn run() {
             set_pinned,
             forget_layout,
             request_permission,
+            get_update,
+            check_update,
+            install_update,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Mooring");

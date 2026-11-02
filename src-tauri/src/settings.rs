@@ -14,6 +14,8 @@ pub struct Settings {
     pub settle_delay_secs: u64,
     /// Seconds between automatic snapshots.
     pub snapshot_interval_secs: u64,
+    /// Look for a new version when Mooring starts and once a day after that.
+    pub check_for_updates: bool,
 }
 
 impl Default for Settings {
@@ -24,6 +26,7 @@ impl Default for Settings {
             restore_desktop_icons: true,
             settle_delay_secs: 3,
             snapshot_interval_secs: 5,
+            check_for_updates: true,
         }
     }
 }

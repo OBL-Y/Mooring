@@ -9,6 +9,8 @@
   --accent-text: #ffffff;
   --warn-bg: #fff4e5;
   --warn-line: #f2c78b;
+  --info-bg: #e6f3f7;
+  --info-line: #9fd0de;
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -21,6 +23,8 @@
     --accent-text: #0b1a20;
     --warn-bg: #3a2c17;
     --warn-line: #7a5a26;
+    --info-bg: #16303a;
+    --info-line: #2c6577;
   }
 }
 * { box-sizing: border-box; }
@@ -68,6 +72,8 @@ button:disabled { opacity: .5; cursor: default; }
   padding: 12px 14px; margin-bottom: 16px;
 }
 .banner p { font-size: 12px; margin-top: 2px; }
+.banner.info { background: var(--info-bg); border-color: var(--info-line); }
+.banner button { flex-shrink: 0; }
 input[type="checkbox"][role="switch"] {
   appearance: none; -webkit-appearance: none;
   width: 36px; height: 20px; border-radius: 10px; flex-shrink: 0;

@@ -1,6 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const $ = (id) => document.getElementById(id);
-const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs"];
+const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs", "check_for_updates"];
 let settings = null;
 
 function timeAgo(secs) {
@@ -84,6 +84,40 @@ function layoutRow(layout) {
   return row;
 }
 
+function renderUpdate(u) {
+  $("update-title").textContent = `Mooring ${u.current_version}`;
+  const action = $("update-action");
+  let hint;
+  if (u.installing) hint = `Installing ${u.available_version}… Mooring will restart.`;
+  else if (u.checking) hint = "Checking for updates…";
+  else if (u.available_version) hint = `Version ${u.available_version} is available.`;
+  else if (u.error) hint = u.error;
+  else if (u.checked_at) hint = `Up to date · checked ${timeAgo(u.checked_at)}`;
+  else hint = "Not checked yet.";
+  $("update-hint").textContent = hint;
+  action.textContent = u.available_version ? "Install and Restart" : "Check Now";
+  action.disabled = u.checking || u.installing;
+
+  $("update-banner").hidden = !u.available_version;
+  if (u.available_version) {
+    $("update-banner-title").textContent = `Mooring ${u.available_version} is available.`;
+    $("update-banner-notes").textContent = u.installing
+      ? "Downloading and installing… Mooring will restart."
+      : `You have ${u.current_version}.`;
+    $("update-banner-install").disabled = u.installing;
+  }
+}
+
+async function installUpdate() {
+  renderUpdate({ ...(await invoke("get_update")), installing: true });
+  try {
+    await invoke("install_update");
+  } catch (e) {
+    showMessage(String(e));
+  }
+  renderUpdate(await invoke("get_update"));
+}
+
 async function refresh() {
   const status = await invoke("get_status");
   $("current").textContent = status.current_label || "Looking at your displays…";
@@ -93,6 +127,8 @@ async function refresh() {
   if (status.last_event) {
     showMessage(`${status.last_event} · ${timeAgo(status.last_event_at)}`);
   }
+
+  renderUpdate(await invoke("get_update"));
 
   const list = $("layouts");
   list.replaceChildren();
@@ -123,6 +159,13 @@ $("restore").onclick = () =>
     r.moved ? `Restored ${r.moved} windows` : "Windows are already in place");
 $("save").onclick = () => run($("save"), "save_now", (n) => `Saved ${n} windows`);
 $("grant").onclick = () => invoke("request_permission");
+$("update-banner-install").onclick = installUpdate;
+$("update-action").onclick = async () => {
+  if ($("update-action").textContent.startsWith("Install")) return installUpdate();
+  const pending = invoke("check_update");
+  renderUpdate({ ...(await invoke("get_update")), checking: true });
+  renderUpdate(await pending);
+};
 for (const f of fields) $(f).addEventListener("change", saveSettings);
 
 // Pick up changes made from the tray menu when the window comes back.

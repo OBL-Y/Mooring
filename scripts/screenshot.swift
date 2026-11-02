@@ -13,7 +13,8 @@ let mock = """
 const now = Date.now() / 1000;
 const data = {
   get_settings: { auto_restore: true, restore_on_undock: true, restore_desktop_icons: true,
-                  launch_at_login: true, settle_delay_secs: 3, snapshot_interval_secs: 5 },
+                  launch_at_login: true, settle_delay_secs: 3, snapshot_interval_secs: 5,
+                  check_for_updates: true },
   get_status: {
     platform: "windows", supports_icons: true, has_permission: true,
     current_label: "3 displays: Built-in 1920×1200, 2560×1440, 2560×1440",
@@ -27,6 +28,8 @@ const data = {
         window_count: 6, icon_count: 22, saved_at: now - 2 * 86400, pinned: true },
     ],
   },
+  get_update: { current_version: "0.1.0", checking: false, installing: false, available_version: null,
+                checked_at: now - 2 * 3600, error: null },
 };
 window.__TAURI__ = { core: { invoke: async (cmd) => structuredClone(data[cmd]) } };
 """

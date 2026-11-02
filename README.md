@@ -17,6 +17,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 - When screens are added or removed, it stops saving, waits for them to settle, and moves every window back to where it was the last time you used that setup.
 - On Windows, it also saves and restores desktop icon positions.
 - Lets you **lock** a layout so the automatic saving won't change it.
+- Keeps itself up to date. It checks for a new version when it starts and once a day, and you can check any time from Settings or the tray menu. Updates install only when you click **Install and Restart**.
 - Installs with a normal installer. On Windows you can install just for yourself (no admin rights) or for everyone (admin). It adds a Start menu entry and a desktop shortcut, and runs at startup. Startup can be turned off at any time.
 
 <p align="center">
@@ -67,7 +68,7 @@ Windows has been tested on real docks. macOS still needs testing.
 
 ### 4. Features after v0.1
 
-- [ ] **Auto-update** using Tauri's updater plugin.
+- [x] **Auto-update** using Tauri's updater plugin.
 - [ ] **Late-opening apps:** put an app's window in its saved spot when the app is opened after you've redocked.
 - [ ] **Window stacking order:** restore which window was in front of which.
 - [ ] **Virtual desktops:** support Windows virtual desktops and macOS Spaces.
@@ -107,6 +108,7 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 | Restore desktop icons | On | Windows only. |
 | Run at startup / Open at login | On | Start Mooring quietly when you sign in. |
 | Wait before restoring | 3 s | Increase it if your dock is slow to wake its screens. |
+| Check for updates automatically | On | Look for a new version at start-up and once a day. Mooring tells you when one is ready; it never installs without asking. |
 
 ### Known limits
 
@@ -114,6 +116,8 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 - Full-screen macOS windows have their own Space, so Mooring leaves them alone.
 - On Windows, windows of apps running as administrator can't be moved unless Mooring also runs as administrator.
 - A window that was closed and reopened gets its old spot back only if its app and title (or its app) match what was saved.
+- Updates come from full releases only. Beta (pre-release) builds don't update themselves; install the next beta by hand.
+- Until the Mac build is signed with a Developer ID, macOS may forget Mooring's Accessibility access after an update. Turn it off and on again in System Settings › Privacy & Security › Accessibility.
 
 ## How it works
 
@@ -173,6 +177,12 @@ For maintainers:
 4. Download and test both installers, then publish the release.
 
 For test builds, use a tag with a suffix, such as `v0.1.0-beta.1`. These are published straight away as a **pre-release**, so testers can download the installers without signing in.
+
+### Updates
+
+Every release includes signed update files and a `latest.json`. The app checks `https://github.com/OBL-Y/Mooring/releases/latest/download/latest.json`, which GitHub points at the newest **published, non-pre-release** release. So publishing a release is what sends the update to everyone, and drafts and betas never do. The app only offers an update when that release's version number is higher than its own, so bump the version for every release.
+
+The update files are signed with a private key that must be set as the repository secret `TAURI_SIGNING_PRIVATE_KEY` (with `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` if the key has a password). Without it, the Release workflow fails. The matching public key is in `src-tauri/tauri.conf.json`. Keep a backup of the private key somewhere safe: if it's lost, existing installs can't be updated and people have to reinstall by hand.
 
 To sign the Mac build, add these repository secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and `APPLE_TEAM_ID`. For Windows signing, see the [Tauri Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
 
