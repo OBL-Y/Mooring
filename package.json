@@ -7,7 +7,8 @@
     "tauri": "tauri",
     "dev": "tauri dev",
     "build": "tauri build",
-    "icons": "swift scripts/make-icon.swift src-tauri/icons && tauri icon src-tauri/icons/source.png"
+    "icons": "swift scripts/make-icon.swift src-tauri/icons && tauri icon src-tauri/icons/source.png",
+    "screenshots": "swift scripts/screenshot.swift ui docs/images"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

@@ -4,7 +4,7 @@ A boat moors at a dock and returns to the same spot, which is what your windows 
 
 Mooring is a free, open-source app for **Windows and macOS** that puts your windows back where they were when you plug your laptop into a dock or unplug it. On Windows it also puts desktop icons back in the order you left them.
 
-> **Status: early development (v0.1, not yet released).** The app builds, but it hasn't been tested on real docking setups yet. See the [Roadmap](#roadmap) for what's left before a first release. Help is very welcome; see [Contributing](#contributing).
+> **Status: early development (v0.1, not yet released).** It has been tested on Windows docking setups; macOS testing is still to do. See the [Roadmap](#roadmap) for what's left before a first release. Help is very welcome; see [Contributing](#contributing).
 
 ## The problem
 
@@ -19,13 +19,20 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 - Lets you **lock** a layout so the automatic saving won't change it.
 - Installs with a normal installer. On Windows you can install just for yourself (no admin rights) or for everyone (admin). It adds a Start menu entry and a desktop shortcut, and runs at startup. Startup can be turned off at any time.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/settings-dark.png">
+    <img src="docs/images/settings-light.png" width="420" alt="Mooring's Settings window: Restore Windows Now and Save Current Layout buttons, switches for automatic restore, undock restore, desktop icons and run at startup, and a list of saved layouts for three display setups">
+  </picture>
+</p>
+
 ## Roadmap
 
 These are the steps from here to a first public release and beyond. Tick them off in PRs as they're done.
 
 ### 1. Test on real hardware (needed for v0.1.0)
 
-The code compiles on both systems, but none of this has been tried on a real dock yet.
+Windows has been tested on real docks. macOS still needs testing.
 
 - [ ] **macOS:** grant Accessibility access, dock and undock, and check that windows go back to the right screens.
 - [ ] **macOS:** check minimized windows and windows on other Spaces.
@@ -52,9 +59,11 @@ The code compiles on both systems, but none of this has been tried on a real doc
 
 ### 3. Make it open-source friendly
 
-- [ ] Add `CONTRIBUTING.md`, a code of conduct, and issue templates (bug report: OS version, monitor setup, logs).
+- [x] Add `CONTRIBUTING.md`.
+- [ ] Add a code of conduct and issue templates (bug report: OS version, monitor setup, logs).
 - [ ] Label starter tasks as `good first issue`.
-- [ ] Add a screenshot or short GIF of the Settings window and a before/after restore to this README.
+- [x] Add a screenshot of the Settings window to this README.
+- [ ] Add a short GIF of a before/after restore (needs a screen recording on a real dock).
 
 ### 4. Features after v0.1
 
@@ -142,6 +151,7 @@ src-tauri/
   windows/hooks.nsh    Extra Windows installer/uninstaller steps
 ui/                    Settings window (plain HTML, CSS, JS, no build step)
 scripts/make-icon.swift  Draws the app and tray icons
+scripts/screenshot.swift Renders the Settings screenshots in docs/images
 .github/workflows/     CI (tests on both OSes) and Release (builds installers)
 ```
 
@@ -149,74 +159,7 @@ scripts/make-icon.swift  Draws the app and tray icons
 
 Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to pick an item from [step 1 of the Roadmap](#1-test-on-real-hardware-needed-for-v010), try it, and open an issue with what happened.
 
-### 1. Install the tools
-
-**Both systems**
-- [Rust](https://rustup.rs) (stable)
-- [Node.js](https://nodejs.org) 20 or later
-
-**Windows**
-- [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) with the **Desktop development with C++** workload
-- WebView2. It's already installed on Windows 11.
-
-**macOS**
-- Xcode Command Line Tools: `xcode-select --install`
-
-See Tauri's [prerequisites guide](https://v2.tauri.app/start/prerequisites/) if anything is missing.
-
-### 2. Get the code and run it
-
-```bash
-git clone https://github.com/OBL-Y/Mooring.git
-```
-
-```bash
-cd Mooring && npm install
-```
-
-```bash
-npm run dev
-```
-
-On macOS, the development build runs from your terminal, so give **your terminal app** (or your editor) Accessibility access in System Settings › Privacy & Security › Accessibility.
-
-Note: the first run turns on launch-at-login for the development build. Turn it off from the tray menu when you're done.
-
-### 3. Check your change
-
-```bash
-cargo test --manifest-path src-tauri/Cargo.toml
-```
-
-```bash
-cargo fmt --manifest-path src-tauri/Cargo.toml
-```
-
-```bash
-cargo clippy --manifest-path src-tauri/Cargo.toml --all-targets -- -D warnings
-```
-
-To see what Mooring reads on your machine (screens, windows and icons), run:
-
-```bash
-cargo test --manifest-path src-tauri/Cargo.toml live_read -- --ignored --nocapture
-```
-
-Logs are written to `~/Library/Logs/io.github.obl-y.mooring` on macOS and `%LOCALAPPDATA%\io.github.obl-y.mooring\logs` on Windows. Saved layouts and settings are in `~/Library/Application Support/io.github.obl-y.mooring` on macOS and `%APPDATA%\io.github.obl-y.mooring` on Windows.
-
-### 4. Open a pull request
-
-1. Fork the repo and create a branch from `main`.
-2. Keep each PR to one change, and say in the description what you tested and on which OS and monitor setup.
-3. CI runs the formatting check, clippy and the tests on both Windows and macOS. Please make sure it's green.
-
-### Build the installers locally
-
-```bash
-npm run build
-```
-
-The output goes to `src-tauri/target/release/bundle/`: `nsis/` on Windows, and `macos/` and `dmg/` on macOS. To regenerate the icons, run `npm run icons` (needs macOS).
+[CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
 
 ## Releasing
 
