@@ -4,7 +4,7 @@ Thanks for helping. Mooring is small, and every bug report, test on a new dock s
 
 Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
-The most useful thing right now is testing on real hardware. Pick an open item from [step 1 of the Roadmap](README.md#1-test-on-real-hardware-needed-for-v010), try it, and open an issue with what happened. That counts even if it all worked.
+The most useful thing right now is testing on real hardware. Try Mooring with your own dock and monitors, and open an issue with what happened. That counts even if it all worked.
 
 ## Reporting a bug
 

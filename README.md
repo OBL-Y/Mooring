@@ -29,27 +29,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 
 ## Roadmap
 
-These are the steps from here to a first public release and beyond. Tick them off in PRs as they're done.
-
-### 1. Test on real hardware (needed for v0.1.0)
-
-Windows and macOS have both been tested on real docks.
-
-- [x] **macOS:** grant Accessibility access, dock and undock, and check that windows go back to the right screens.
-- [x] **macOS:** check minimized windows and windows on other Spaces.
-- [x] **Windows 11:** dock and undock with one and with two external monitors.
-- [x] **Windows 10:** same as above.
-- [x] **Windows:** maximized windows move to the right monitor and stay maximized.
-- [x] **Windows:** monitors with different scaling (e.g. 150% laptop with a 100% monitor) still get exact positions.
-- [x] **Windows:** desktop icons restore (with "Auto arrange icons" off).
-- [x] **Windows installer:** a standard account (or saying No to the admin prompt) installs just for that user.
-- [x] **Windows installer:** running as administrator shows the choice, and "Anyone who uses this computer" installs to Program Files.
-- [x] **Windows installer:** the Start menu entry and the desktop shortcut are created.
-- [x] **Windows installer:** uninstall removes the app and the startup entry.
-- [x] **Run at startup / Open at login:** on by default after first run, and turning it off in Settings or the tray menu works.
-- [ ] Sleep, wake and lid close while docked don't scramble the saved layouts.
-
-### 2. Make it trustworthy to install (needed for v0.1.0)
+### Before the first release
 
 - [ ] **macOS signing:** sign and notarize the Mac build with an Apple Developer ID. Without it, Gatekeeper blocks the app. The release workflow is already wired for the secrets listed under [Releasing](#releasing).
 - [ ] **Windows signing:** sign the Windows installer. Without it, SmartScreen shows a warning. The plan is to use [SignPath Foundation](https://signpath.org/), which signs open-source projects for free:
@@ -58,24 +38,9 @@ Windows and macOS have both been tested on real docks.
   - Until then, Windows releases ship unsigned, and testers click **More info › Run anyway**.
 - [ ] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
 
-### 3. Make it open-source friendly
+### Later
 
-- [x] Add `CONTRIBUTING.md`.
-- [x] Add a code of conduct and issue templates (bug report: OS version, monitor setup, logs).
-- [ ] Label starter tasks as `good first issue`.
-- [x] Add a screenshot of the Settings window to this README.
-- [ ] Add a short GIF of a before/after restore (needs a screen recording on a real dock).
-
-### 4. Features after v0.1
-
-- [x] **Auto-update** using Tauri's updater plugin.
-- [ ] **Late-opening apps:** put an app's window in its saved spot when the app is opened after you've redocked.
-- [ ] **Window stacking order:** restore which window was in front of which.
-- [ ] **Virtual desktops:** support Windows virtual desktops and macOS Spaces.
-- [ ] **Diagnostics:** an "Export diagnostics" button that zips the logs and the saved layouts for bug reports.
-- [ ] **Package managers:** distribute through `winget` and a Homebrew cask.
 - [ ] **Linux** support (X11 first).
-- [ ] **Translations** of the Settings window.
 
 ## Install
 
@@ -166,7 +131,7 @@ scripts/screenshot.swift Renders the Settings screenshots in docs/images
 
 ## Contributing
 
-Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to pick an item from [step 1 of the Roadmap](#1-test-on-real-hardware-needed-for-v010), try it, and open an issue with what happened.
+Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to try Mooring with your own dock and open an issue with what happened.
 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
 
