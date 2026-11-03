@@ -41,6 +41,7 @@ extern "C" {
         value: CFTypeRef,
     ) -> AXError;
     fn AXUIElementSetMessagingTimeout(el: AXUIElementRef, seconds: f32) -> AXError;
+    fn AXUIElementPerformAction(el: AXUIElementRef, action: CFStringRef) -> AXError;
     fn AXValueCreate(kind: u32, ptr: *const c_void) -> AXValueRef;
     fn AXValueGetValue(value: AXValueRef, kind: u32, ptr: *mut c_void) -> u8;
     fn AXIsProcessTrusted() -> u8;
@@ -315,6 +316,40 @@ pub fn apply(target: &WindowState, current: &WindowState) -> Result<(), String> 
         set_attr(el, "AXMinimized", CFBoolean::true_value().as_CFTypeRef())?;
     }
     Ok(())
+}
+
+/// Puts windows in the given front-to-back order, back first. Each window's app
+/// is brought forward and the window raised, so this briefly changes the
+/// focused app. Returns how many windows were raised.
+pub fn set_stacking(front_to_back: &[WindowState]) -> usize {
+    let mut raised = 0;
+    for target in front_to_back.iter().rev() {
+        if target.state == WinState::Minimized || target.id == 0 {
+            continue;
+        }
+        let app = AppElement::new(target.pid);
+        let windows = app.windows();
+        let Some(w) = windows
+            .iter()
+            .find(|w| window_id(w.as_CFTypeRef()) == target.id)
+        else {
+            continue;
+        };
+        let _ = set_attr(
+            app.0.as_CFTypeRef(),
+            "AXFrontmost",
+            CFBoolean::true_value().as_CFTypeRef(),
+        );
+        let raise = attr("AXRaise");
+        if unsafe { AXUIElementPerformAction(w.as_CFTypeRef(), raise.as_concrete_TypeRef()) }
+            == AX_OK
+        {
+            raised += 1;
+        }
+        // Give the window server a moment, or later raises can land first.
+        std::thread::sleep(std::time::Duration::from_millis(40));
+    }
+    raised
 }
 
 pub fn desktop_icons() -> Vec<IconState> {

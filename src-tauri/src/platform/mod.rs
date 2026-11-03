@@ -1,5 +1,5 @@
 //! OS-specific window access. Each backend provides the same free functions:
-//! `displays`, `windows`, `apply`, `desktop_icons`, `set_desktop_icons`,
+//! `displays`, `windows`, `apply`, `set_stacking`, `desktop_icons`, `set_desktop_icons`,
 //! `has_permission`, `request_permission`, plus `NAME` and `SUPPORTS_ICONS`.
 
 #[cfg(target_os = "macos")]

@@ -12,6 +12,10 @@ pub fn windows() -> Vec<WindowState> {
 pub fn apply(_target: &WindowState, _current: &WindowState) -> Result<(), String> {
     Err("unsupported platform".into())
 }
+pub fn set_stacking(_front_to_back: &[WindowState]) -> usize {
+    0
+}
+
 pub fn desktop_icons() -> Vec<IconState> {
     Vec::new()
 }

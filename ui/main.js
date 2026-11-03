@@ -1,6 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const $ = (id) => document.getElementById(id);
-const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs", "check_for_updates", "place_late_windows"];
+const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs", "check_for_updates", "place_late_windows", "restore_stacking"];
 let settings = null;
 
 function timeAgo(secs) {
@@ -125,6 +125,10 @@ async function refresh() {
   $("permission").hidden = status.has_permission;
   $("icons-row").hidden = !status.supports_icons;
   $("login-title").textContent = status.platform === "macos" ? "Open at login" : "Run at startup";
+  if (status.platform === "macos") {
+    $("stacking-hint").textContent =
+      "Also put back which window was in front of which. Each app comes forward briefly, so the screen may flicker.";
+  }
   if (status.last_event) {
     showMessage(`${status.last_event} · ${timeAgo(status.last_event_at)}`);
   }

@@ -290,7 +290,7 @@ impl Engine {
             .then(|| LateWatch::new(layout.key.clone(), missing, &current, Instant::now()));
 
         let mut moved: Vec<(&WindowState, u64)> = Vec::new();
-        for (si, ci) in pairs {
+        for &(si, ci) in &pairs {
             let (target, now) = (&layout.windows[si], &current[ci]);
             if target.same_place(now) {
                 continue;
@@ -321,6 +321,23 @@ impl Engine {
                     _ => report.moved += 1,
                 }
             }
+        }
+
+        if self.settings().restore_stacking && pairs.len() > 1 {
+            // Front-to-back as saved, using the windows as they are now.
+            let mut stack: Vec<(u32, WindowState)> = pairs
+                .iter()
+                .map(|&(si, ci)| {
+                    let target = &layout.windows[si];
+                    let mut window = current[ci].clone();
+                    window.state = target.state;
+                    (target.order, window)
+                })
+                .collect();
+            stack.sort_by_key(|(order, _)| *order);
+            let stack: Vec<WindowState> = stack.into_iter().map(|(_, w)| w).collect();
+            let stacked = platform::set_stacking(&stack);
+            log::info!("restored stacking order of {stacked} windows");
         }
 
         if platform::SUPPORTS_ICONS

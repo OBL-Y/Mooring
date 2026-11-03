@@ -18,6 +18,9 @@ pub struct Settings {
     pub check_for_updates: bool,
     /// After a restore, put windows of apps opened later in their saved spot.
     pub place_late_windows: bool,
+    /// Also restore which window is in front of which. On macOS this briefly
+    /// brings each app forward, so it's off by default there.
+    pub restore_stacking: bool,
 }
 
 impl Default for Settings {
@@ -30,6 +33,7 @@ impl Default for Settings {
             snapshot_interval_secs: 5,
             check_for_updates: true,
             place_late_windows: true,
+            restore_stacking: cfg!(windows),
         }
     }
 }

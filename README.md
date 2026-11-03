@@ -75,6 +75,7 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 | --- | --- | --- |
 | Restore automatically | On | Put windows back when screens change. |
 | Also restore when undocking | On | Also restore the laptop-only layout when screens are removed. |
+| Restore stacking order | On (Windows), Off (macOS) | Also put back which window was in front of which. On a Mac each app comes forward briefly, so the screen may flicker. |
 | Place apps opened later | On | For 30 minutes after a restore, put windows of apps you open in their saved spot (once each). |
 | Restore desktop icons | On | Windows only. |
 | Run at startup / Open at login | On | Start Mooring quietly when you sign in. |

@@ -26,8 +26,9 @@ use windows::Win32::UI::Shell::{
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumWindows, GetClassNameW, GetWindow, GetWindowLongPtrW, GetWindowPlacement, GetWindowTextW,
-    GetWindowThreadProcessId, IsIconic, IsWindowVisible, IsZoomed, SetWindowPlacement, GWL_EXSTYLE,
-    GW_OWNER, SW_SHOWMAXIMIZED, SW_SHOWMINNOACTIVE, SW_SHOWNOACTIVATE, WINDOWPLACEMENT,
+    GetWindowThreadProcessId, IsIconic, IsWindowVisible, IsZoomed, SetWindowPlacement,
+    SetWindowPos, GWL_EXSTYLE, GW_OWNER, HWND_TOP, SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOOWNERZORDER,
+    SWP_NOSIZE, SW_SHOWMAXIMIZED, SW_SHOWMINNOACTIVE, SW_SHOWNOACTIVATE, WINDOWPLACEMENT,
     WPF_ASYNCWINDOWPLACEMENT, WS_EX_APPWINDOW, WS_EX_TOOLWINDOW,
 };
 
@@ -273,6 +274,27 @@ pub fn apply(target: &WindowState, current: &WindowState) -> Result<(), String> 
         // Fails for windows of elevated apps when Mooring isn't elevated.
         SetWindowPlacement(hwnd, &wp).map_err(|e| e.to_string())
     }
+}
+
+/// Puts windows in the given front-to-back order without activating any of
+/// them: the first goes on top, each next one directly behind the previous.
+/// Returns how many windows were placed.
+pub fn set_stacking(front_to_back: &[WindowState]) -> usize {
+    let flags = SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER;
+    let mut above = HWND_TOP;
+    let mut placed = 0;
+    for target in front_to_back {
+        if target.state == WinState::Minimized {
+            continue;
+        }
+        let hwnd = hwnd_of(target.id);
+        // Fails for windows of elevated apps when Mooring isn't elevated.
+        if unsafe { SetWindowPos(hwnd, Some(above), 0, 0, 0, 0, flags) }.is_ok() {
+            above = hwnd;
+            placed += 1;
+        }
+    }
+    placed
 }
 
 // ---------- Desktop icons ----------
