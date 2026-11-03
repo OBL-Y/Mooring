@@ -4,7 +4,7 @@ A boat moors at a dock and returns to the same spot, which is what your windows 
 
 Mooring is a free, open-source app for **Windows and macOS** that puts your windows back where they were when you plug your laptop into a dock or unplug it. On Windows it also puts desktop icons back in the order you left them.
 
-> **Status: early development (v0.1, not yet released).** It has been tested on Windows docking setups; macOS testing is still to do. See the [Roadmap](#roadmap) for what's left before a first release. Help is very welcome; see [Contributing](#contributing).
+> **Status: early development (v0.1, not yet released).** It has been tested on real docking setups on Windows and macOS. See the [Roadmap](#roadmap) for what's left before a first release. Help is very welcome; see [Contributing](#contributing).
 
 ## The problem
 
@@ -33,10 +33,10 @@ These are the steps from here to a first public release and beyond. Tick them of
 
 ### 1. Test on real hardware (needed for v0.1.0)
 
-Windows has been tested on real docks. macOS still needs testing.
+Windows and macOS have both been tested on real docks.
 
-- [ ] **macOS:** grant Accessibility access, dock and undock, and check that windows go back to the right screens.
-- [ ] **macOS:** check minimized windows and windows on other Spaces.
+- [x] **macOS:** grant Accessibility access, dock and undock, and check that windows go back to the right screens.
+- [x] **macOS:** check minimized windows and windows on other Spaces.
 - [x] **Windows 11:** dock and undock with one and with two external monitors.
 - [x] **Windows 10:** same as above.
 - [x] **Windows:** maximized windows move to the right monitor and stay maximized.
