@@ -96,6 +96,9 @@ To restore desktop icons, right-click the desktop › View and turn off **Auto a
 1. Open `Mooring_x.y.z_universal.dmg` and drag Mooring to Applications.
 2. Open Mooring. Until builds are notarized, macOS will say it can't check the app. Go to **System Settings › Privacy & Security**, scroll down, and click **Open Anyway**. You only need to do this once.
 3. When asked, turn Mooring on under **System Settings › Privacy & Security › Accessibility**. Moving other apps' windows isn't possible without this.
+4. To have Mooring start when you log in, check **System Settings › General › Login Items & Extensions** and make sure Mooring is on under **Allow in the Background**. macOS shows a notification when Mooring adds itself there, and it's easy to dismiss without allowing it.
+
+Mooring lives in the menu bar as an anchor icon. Closing its window doesn't quit it; use **Quit Mooring** from the icon's menu. If you can't see the icon, check **System Settings › Menu Bar**, and on MacBooks with a notch, make room by ⌘-dragging other icons out of the menu bar.
 
 ### Settings
 
