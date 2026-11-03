@@ -16,6 +16,8 @@ pub struct Settings {
     pub snapshot_interval_secs: u64,
     /// Look for a new version when Mooring starts and once a day after that.
     pub check_for_updates: bool,
+    /// After a restore, put windows of apps opened later in their saved spot.
+    pub place_late_windows: bool,
 }
 
 impl Default for Settings {
@@ -27,6 +29,7 @@ impl Default for Settings {
             settle_delay_secs: 3,
             snapshot_interval_secs: 5,
             check_for_updates: true,
+            place_late_windows: true,
         }
     }
 }

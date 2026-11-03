@@ -14,7 +14,7 @@ const now = Date.now() / 1000;
 const data = {
   get_settings: { auto_restore: true, restore_on_undock: true, restore_desktop_icons: true,
                   launch_at_login: true, settle_delay_secs: 3, snapshot_interval_secs: 5,
-                  check_for_updates: true },
+                  check_for_updates: true, place_late_windows: true },
   get_status: {
     platform: "windows", supports_icons: true, has_permission: true,
     current_label: "3 displays: Built-in 1920×1200, 2560×1440, 2560×1440",

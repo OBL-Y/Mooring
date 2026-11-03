@@ -1,5 +1,6 @@
 mod diagnostics;
 mod engine;
+mod late;
 mod login;
 mod model;
 mod platform;

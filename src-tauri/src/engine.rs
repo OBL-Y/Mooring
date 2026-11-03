@@ -1,3 +1,4 @@
+use crate::late::LateWatch;
 use crate::model::{display_key, display_label, pair_windows, Layout, WindowState};
 use crate::platform;
 use crate::settings::Settings;
@@ -18,7 +19,10 @@ pub struct Engine {
     store: Mutex<Store>,
     track: Mutex<Track>,
     /// Held while snapshotting or restoring so the two never overlap.
+    /// When both are needed, take `busy` before `late`.
     busy: Mutex<()>,
+    /// Saved windows from the last restore whose apps weren't open yet.
+    late: Mutex<Option<LateWatch>>,
 }
 
 #[derive(Default)]
@@ -83,6 +87,7 @@ impl Engine {
             settings: Mutex::new(settings),
             track: Mutex::new(Track::default()),
             busy: Mutex::new(()),
+            late: Mutex::new(None),
         })
     }
 
@@ -136,6 +141,10 @@ impl Engine {
             t.key = key;
             t.label = display_label(&displays);
             t.display_count = displays.len();
+            drop(t);
+            // Late windows belong to the old setup.
+            *lock(&self.late) = None;
+            let mut t = lock(&self.track);
             if first {
                 t.last_event = format!("Watching {}", t.label);
                 t.last_event_at = now_secs();
@@ -178,6 +187,10 @@ impl Engine {
             return;
         }
 
+        drop(t);
+        self.place_late_windows(&key);
+
+        let t = lock(&self.track);
         let due = t
             .last_snapshot
             .is_none_or(|at| at.elapsed() >= Duration::from_secs(settings.snapshot_interval_secs));
@@ -261,6 +274,21 @@ impl Engine {
         let pairs = pair_windows(&layout.windows, &current);
         report.missing = layout.windows.len() - pairs.len();
 
+        // Remember the windows whose apps aren't open yet, to place them when they open.
+        let mut matched = vec![false; layout.windows.len()];
+        for &(si, _) in &pairs {
+            matched[si] = true;
+        }
+        let missing: Vec<WindowState> = layout
+            .windows
+            .iter()
+            .zip(&matched)
+            .filter(|(_, &m)| !m)
+            .map(|(w, _)| w.clone())
+            .collect();
+        *lock(&self.late) = (self.settings().place_late_windows && !missing.is_empty())
+            .then(|| LateWatch::new(layout.key.clone(), missing, &current, Instant::now()));
+
         let mut moved: Vec<(&WindowState, u64)> = Vec::new();
         for (si, ci) in pairs {
             let (target, now) = (&layout.windows[si], &current[ci]);
@@ -307,6 +335,51 @@ impl Engine {
         report
     }
 
+    /// Moves newly opened windows that match a saved window from the last restore.
+    fn place_late_windows(&self, key: &str) {
+        if lock(&self.late).is_none() {
+            return;
+        }
+        let _busy = lock(&self.busy);
+        let placed = {
+            let mut late = lock(&self.late);
+            let Some(watch) = late.as_mut() else {
+                return;
+            };
+            let now = Instant::now();
+            if watch.key != key || !self.settings().place_late_windows {
+                *late = None;
+                return;
+            }
+            let placed = watch.observe(&platform::windows(), now);
+            if watch.finished(now) {
+                *late = None;
+            }
+            placed
+        };
+
+        for (target, window) in placed {
+            if target.same_place(&window) {
+                continue;
+            }
+            if let Err(e) = platform::apply(&target, &window) {
+                log::warn!("could not place {} '{}': {e}", window.app, window.title);
+                continue;
+            }
+            // Apps that are still starting up sometimes move themselves once more.
+            std::thread::sleep(RETRY_DELAY);
+            if let Some(now) = platform::windows().iter().find(|w| w.id == window.id) {
+                if !target.same_place(now) {
+                    let _ = platform::apply(&target, now);
+                }
+            }
+            self.note(format!(
+                "Placed {} in its saved spot",
+                app_name(&window.app)
+            ));
+        }
+    }
+
     pub fn set_pinned(&self, key: &str, pinned: bool) -> bool {
         lock(&self.store).set_pinned(key, pinned)
     }
@@ -339,6 +412,14 @@ impl Engine {
             layouts,
         }
     }
+}
+
+/// A short app name: on Windows `app` is the program's full path.
+fn app_name(app: &str) -> &str {
+    let name = app.rsplit(['\\', '/']).next().unwrap_or(app);
+    name.strip_suffix(".exe")
+        .or_else(|| name.strip_suffix(".EXE"))
+        .unwrap_or(name)
 }
 
 fn describe_restore(r: &RestoreReport) -> String {

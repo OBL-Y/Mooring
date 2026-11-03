@@ -14,7 +14,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 
 - Runs in the system tray (Windows) or menu bar (macOS).
 - Every few seconds, saves the position, size and state (normal, maximized or minimized) of every app window, filed under the current set of screens. Each display setup gets its own saved layout, such as "desk with two monitors", "laptop only" or "meeting room TV".
-- When screens are added or removed, it stops saving, waits for them to settle, and moves every window back to where it was the last time you used that setup.
+- When screens are added or removed, it stops saving, waits for them to settle, and moves every window back to where it was the last time you used that setup. Apps you open in the next half hour go back to their saved spot too.
 - On Windows, it also saves and restores desktop icon positions.
 - Lets you **lock** a layout so the automatic saving won't change it.
 - Keeps itself up to date. It checks for a new version when it starts and once a day, and you can check any time from Settings or the tray menu. Updates install only when you click **Install and Restart**.
@@ -75,6 +75,7 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 | --- | --- | --- |
 | Restore automatically | On | Put windows back when screens change. |
 | Also restore when undocking | On | Also restore the laptop-only layout when screens are removed. |
+| Place apps opened later | On | For 30 minutes after a restore, put windows of apps you open in their saved spot (once each). |
 | Restore desktop icons | On | Windows only. |
 | Run at startup / Open at login | On | Start Mooring quietly when you sign in. |
 | Wait before restoring | 3 s | Increase it if your dock is slow to wake its screens. |

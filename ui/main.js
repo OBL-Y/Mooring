@@ -1,6 +1,6 @@
 const { invoke } = window.__TAURI__.core;
 const $ = (id) => document.getElementById(id);
-const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs", "check_for_updates"];
+const fields = ["auto_restore", "restore_on_undock", "restore_desktop_icons", "launch_at_login", "settle_delay_secs", "check_for_updates", "place_late_windows"];
 let settings = null;
 
 function timeAgo(secs) {
