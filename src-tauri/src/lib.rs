@@ -292,7 +292,7 @@ pub fn run() {
         tauri::Builder::default().plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             show_settings(app)
         }));
-    #[cfg(windows)]
+    #[cfg(any(target_os = "macos", windows))]
     let builder = builder.plugin(tauri_plugin_autostart::init(
         tauri_plugin_autostart::MacosLauncher::LaunchAgent,
         Some(vec![AUTOSTART_ARG]),

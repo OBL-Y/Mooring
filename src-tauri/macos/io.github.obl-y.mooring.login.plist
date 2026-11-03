@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<!-- Starts Mooring quietly at login. Registered by login.rs through SMAppService. -->
+<!-- Registered by 0.1.0-beta.5 only. Kept in the bundle so login.rs can unregister it
+     (SMAppService needs the plist present); remove once testers are past beta.5. -->
 <plist version="1.0">
 <dict>
   <key>Label</key>

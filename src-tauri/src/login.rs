@@ -1,9 +1,12 @@
 //! Starting Mooring when you sign in.
 //!
-//! Windows uses the autostart plugin (a per-user `Run` registry value).
-//! macOS registers the launch agent bundled in the app
-//! (`Contents/Library/LaunchAgents`) through `SMAppService`, so it shows up under
-//! Login Items & Extensions and macOS can tell us when it needs approval.
+//! Both systems use the autostart plugin: a per-user `Run` registry value on
+//! Windows, and `~/Library/LaunchAgents/Mooring.plist` on macOS. On macOS,
+//! `SMAppService` also tells us when Login Items & Extensions has it turned off.
+//!
+//! (A launch agent bundled in the app and registered through `SMAppService` was
+//! tried in 0.1.0-beta.5. macOS didn't start it reliably for an app without an
+//! Apple developer team, so it's removed again on start.)
 
 use tauri::AppHandle;
 
@@ -13,42 +16,47 @@ pub const AUTOSTART_ARG: &str = "--autostart";
 #[cfg(target_os = "macos")]
 mod imp {
     use super::*;
-    use objc2_foundation::NSString;
+    use objc2_foundation::{NSString, NSURL};
     use objc2_service_management::{SMAppService, SMAppServiceStatus};
+    use tauri::Manager;
+    use tauri_plugin_autostart::ManagerExt;
 
-    const PLIST: &str = "io.github.obl-y.mooring.login.plist";
+    /// The bundled agent registered by 0.1.0-beta.5.
+    const BUNDLED_AGENT: &str = "io.github.obl-y.mooring.login.plist";
 
-    fn service() -> objc2::rc::Retained<SMAppService> {
-        unsafe { SMAppService::agentServiceWithPlistName(&NSString::from_str(PLIST)) }
+    fn plist_path(app: &AppHandle) -> Option<std::path::PathBuf> {
+        let home = std::env::var_os("HOME")?;
+        let name = format!("{}.plist", app.package_info().name);
+        Some(
+            std::path::Path::new(&home)
+                .join("Library/LaunchAgents")
+                .join(name),
+        )
     }
 
-    fn status() -> SMAppServiceStatus {
-        unsafe { service().status() }
+    pub fn is_enabled(app: &AppHandle) -> bool {
+        app.autolaunch().is_enabled().unwrap_or(false)
     }
 
-    pub fn is_enabled(_app: &AppHandle) -> bool {
-        status() == SMAppServiceStatus::Enabled
-    }
-
-    pub fn needs_approval(_app: &AppHandle) -> bool {
-        status() == SMAppServiceStatus::RequiresApproval
+    pub fn needs_approval(app: &AppHandle) -> bool {
+        if !is_enabled(app) {
+            return false;
+        }
+        let Some(path) = plist_path(app) else {
+            return false;
+        };
+        let url = NSURL::fileURLWithPath(&NSString::from_str(&path.to_string_lossy()));
+        unsafe { SMAppService::statusForLegacyURL(&url) == SMAppServiceStatus::RequiresApproval }
     }
 
     pub fn set(app: &AppHandle, enabled: bool) -> Result<(), String> {
-        let service = service();
-        let result = unsafe {
-            if enabled {
-                service.registerAndReturnError()
-            } else {
-                service.unregisterAndReturnError()
-            }
+        let autolaunch = app.autolaunch();
+        let result = if enabled {
+            autolaunch.enable()
+        } else {
+            autolaunch.disable()
         };
-        if let Err(e) = result {
-            // Unregistering something that isn't registered isn't a problem.
-            if enabled || unsafe { service.status() } != SMAppServiceStatus::NotRegistered {
-                return Err(e.localizedDescription().to_string());
-            }
-        }
+        result.map_err(|e| e.to_string())?;
         if enabled && needs_approval(app) {
             // Turned off in System Settings: send people there to allow it.
             open_settings();
@@ -60,24 +68,29 @@ mod imp {
         unsafe { SMAppService::openSystemSettingsLoginItems() };
     }
 
-    /// Versions up to 0.1.0-beta.4 wrote `~/Library/LaunchAgents/Mooring.plist`.
-    /// Replace it with the bundled agent, keeping the person's choice.
+    /// Removes the bundled agent that 0.1.0-beta.5 registered, keeping the
+    /// person's choice by turning on the usual login item instead.
     pub fn migrate(app: &AppHandle) {
-        let Some(home) = std::env::var_os("HOME") else {
-            return;
-        };
-        let legacy = std::path::Path::new(&home).join("Library/LaunchAgents/Mooring.plist");
-        if !legacy.exists() {
-            return;
-        }
-        log::info!("replacing old login item with the bundled one");
-        // Keep the old item unless the new one registered, so Mooring still starts at login.
-        if let Err(e) = set(app, true) {
-            log::warn!("could not register login item, keeping the old one: {e}");
+        let agent =
+            unsafe { SMAppService::agentServiceWithPlistName(&NSString::from_str(BUNDLED_AGENT)) };
+        let status = unsafe { agent.status() };
+        if status != SMAppServiceStatus::Enabled && status != SMAppServiceStatus::RequiresApproval {
             return;
         }
-        if let Err(e) = std::fs::remove_file(&legacy) {
-            log::warn!("could not remove old login item: {e}");
+        log::info!("removing the bundled login item from an earlier test version");
+        if let Err(e) = unsafe { agent.unregisterAndReturnError() } {
+            log::warn!(
+                "could not remove bundled login item: {}",
+                e.localizedDescription()
+            );
+        }
+        if !is_enabled(app) {
+            if let Err(e) = set(app, true) {
+                log::warn!("could not turn on login item: {e}");
+            }
+        }
+        if let Ok(dir) = app.path().app_data_dir() {
+            let _ = std::fs::remove_file(dir.join("login-item"));
         }
     }
 }

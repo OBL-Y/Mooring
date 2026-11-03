@@ -46,7 +46,7 @@ Windows has been tested on real docks. macOS still needs testing.
 - [x] **Windows installer:** running as administrator shows the choice, and "Anyone who uses this computer" installs to Program Files.
 - [x] **Windows installer:** the Start menu entry and the desktop shortcut are created.
 - [x] **Windows installer:** uninstall removes the app and the startup entry.
-- [ ] **Run at startup / Open at login:** on by default after first run, and turning it off in Settings or the tray menu works.
+- [x] **Run at startup / Open at login:** on by default after first run, and turning it off in Settings or the tray menu works.
 - [ ] Sleep, wake and lid close while docked don't scramble the saved layouts.
 
 ### 2. Make it trustworthy to install (needed for v0.1.0)
@@ -140,7 +140,7 @@ How each OS does it:
 | Screens | `EnumDisplayMonitors`, with EDID-based ids from `EnumDisplayDevices` | `CGGetActiveDisplayList` |
 | Reading and moving windows | `EnumWindows`, `GetWindowPlacement`, `SetWindowPlacement` | Accessibility API (`AXUIElement`) |
 | Desktop icons | The desktop's `IFolderView` (shell COM) | Not possible |
-| Run at login | Per-user `Run` registry key | Launch agent inside the app, registered with `SMAppService` |
+| Run at login | Per-user `Run` registry key | LaunchAgent in `~/Library/LaunchAgents`, with its approval checked through `SMAppService` |
 | Installer | NSIS (per-user or per-machine) | DMG |
 
 ### Project layout
