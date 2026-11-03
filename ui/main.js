@@ -126,6 +126,8 @@ async function refresh() {
   $("icons-row").hidden = !status.supports_icons;
   $("login-title").textContent = status.platform === "macos" ? "Open at login" : "Run at startup";
   if (status.platform === "macos") {
+    $("late-hint").textContent =
+      "For 30 minutes after a restore, put windows of apps you open, and windows on other Spaces when you switch to them, in their saved spot.";
     $("stacking-hint").textContent =
       "Also put back which window was in front of which. Each app comes forward briefly, so the screen may flicker.";
   }

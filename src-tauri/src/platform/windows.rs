@@ -11,7 +11,7 @@ use windows::Win32::Graphics::Gdi::{
     MONITORINFO, MONITORINFOEXW,
 };
 use windows::Win32::System::Com::{
-    CoCreateInstance, CoInitializeEx, CoTaskMemFree, CoUninitialize, IServiceProvider,
+    CoCreateInstance, CoInitializeEx, CoTaskMemFree, CoUninitialize, IServiceProvider, CLSCTX_ALL,
     CLSCTX_LOCAL_SERVER, COINIT_APARTMENTTHREADED,
 };
 use windows::Win32::System::Threading::{
@@ -20,9 +20,9 @@ use windows::Win32::System::Threading::{
 use windows::Win32::System::Variant::VARIANT;
 use windows::Win32::UI::Shell::Common::ITEMIDLIST;
 use windows::Win32::UI::Shell::{
-    IFolderView, IShellBrowser, IShellWindows, SID_STopLevelBrowser, ShellWindows, StrRetToStrW,
-    SHGDNF, SHGDN_FORPARSING, SHGDN_INFOLDER, SVGIO_ALLVIEW, SVSI_POSITIONITEM, SWC_DESKTOP,
-    SWFO_NEEDDISPATCH,
+    IFolderView, IShellBrowser, IShellWindows, IVirtualDesktopManager, SID_STopLevelBrowser,
+    ShellWindows, StrRetToStrW, VirtualDesktopManager, SHGDNF, SHGDN_FORPARSING, SHGDN_INFOLDER,
+    SVGIO_ALLVIEW, SVSI_POSITIONITEM, SWC_DESKTOP, SWFO_NEEDDISPATCH,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumWindows, GetClassNameW, GetWindow, GetWindowLongPtrW, GetWindowPlacement, GetWindowTextW,
@@ -164,21 +164,45 @@ fn is_cloaked(hwnd: HWND) -> bool {
     }
 }
 
+/// True for a window that's cloaked only because it's on another virtual
+/// desktop. Those are real windows Mooring should save and restore; other
+/// cloaked windows (suspended Store apps, hidden shell windows) are not.
+fn on_other_desktop(desktops: Option<&IVirtualDesktopManager>, hwnd: HWND) -> bool {
+    let Some(desktops) = desktops else {
+        return false;
+    };
+    unsafe {
+        desktops
+            .IsWindowOnCurrentVirtualDesktop(hwnd)
+            .is_ok_and(|on_current| !on_current.as_bool())
+            && desktops
+                .GetWindowDesktopId(hwnd)
+                .is_ok_and(|id| id != windows::core::GUID::zeroed())
+    }
+}
+
 struct Enum {
     own_pid: u32,
+    desktops: Option<IVirtualDesktopManager>,
     out: Vec<WindowState>,
 }
 
 unsafe extern "system" fn window_proc(hwnd: HWND, data: LPARAM) -> BOOL {
     let state = &mut *(data.0 as *mut Enum);
-    if let Some(w) = read_window(hwnd, state.own_pid, state.out.len() as u32) {
+    let order = state.out.len() as u32;
+    if let Some(w) = read_window(hwnd, state.own_pid, order, state.desktops.as_ref()) {
         state.out.push(w);
     }
     true.into()
 }
 
-unsafe fn read_window(hwnd: HWND, own_pid: u32, order: u32) -> Option<WindowState> {
-    if !IsWindowVisible(hwnd).as_bool() || is_cloaked(hwnd) {
+unsafe fn read_window(
+    hwnd: HWND,
+    own_pid: u32,
+    order: u32,
+    desktops: Option<&IVirtualDesktopManager>,
+) -> Option<WindowState> {
+    if !IsWindowVisible(hwnd).as_bool() || (is_cloaked(hwnd) && !on_other_desktop(desktops, hwnd)) {
         return None;
     }
     // Only real app windows: unowned (or explicitly on the taskbar), not tool windows.
@@ -233,14 +257,34 @@ unsafe fn read_window(hwnd: HWND, own_pid: u32, order: u32) -> Option<WindowStat
 }
 
 pub fn windows() -> Vec<WindowState> {
+    let _com = Com::init();
     let mut state = Enum {
         own_pid: std::process::id(),
+        desktops: unsafe { CoCreateInstance(&VirtualDesktopManager, None, CLSCTX_ALL) }.ok(),
         out: Vec::new(),
     };
     unsafe {
         let _ = EnumWindows(Some(window_proc), LPARAM(&mut state as *mut _ as isize));
     }
-    state.out
+    // Release the COM object before COM is uninitialized.
+    let out = std::mem::take(&mut state.out);
+    drop(state);
+    out
+}
+
+unsafe extern "system" fn collect_proc(hwnd: HWND, data: LPARAM) -> BOOL {
+    let ids = &mut *(data.0 as *mut std::collections::HashSet<u64>);
+    ids.insert(hwnd.0 as usize as u64);
+    true.into()
+}
+
+/// Ids of every top-level window that exists, seen or not.
+pub fn existing_windows() -> std::collections::HashSet<u64> {
+    let mut ids = std::collections::HashSet::new();
+    unsafe {
+        let _ = EnumWindows(Some(collect_proc), LPARAM(&mut ids as *mut _ as isize));
+    }
+    ids
 }
 
 pub fn apply(target: &WindowState, current: &WindowState) -> Result<(), String> {

@@ -289,6 +289,15 @@ pub fn windows() -> Vec<WindowState> {
     out
 }
 
+/// Ids of every app window that exists, including ones on other Spaces that
+/// the Accessibility API doesn't list.
+pub fn existing_windows() -> std::collections::HashSet<u64> {
+    window_owners()
+        .into_values()
+        .flat_map(|app| app.order.into_keys())
+        .collect()
+}
+
 pub fn apply(target: &WindowState, current: &WindowState) -> Result<(), String> {
     let app = AppElement::new(current.pid);
     let windows = app.windows();

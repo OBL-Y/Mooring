@@ -16,6 +16,10 @@ pub fn set_stacking(_front_to_back: &[WindowState]) -> usize {
     0
 }
 
+pub fn existing_windows() -> std::collections::HashSet<u64> {
+    std::collections::HashSet::new()
+}
+
 pub fn desktop_icons() -> Vec<IconState> {
     Vec::new()
 }

@@ -4,6 +4,7 @@ use crate::platform;
 use crate::settings::Settings;
 use crate::store::Store;
 use serde::Serialize;
+use std::collections::HashSet;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
@@ -220,7 +221,14 @@ impl Engine {
         }
 
         let settings = self.settings();
-        let windows = platform::windows();
+        let mut windows = platform::windows();
+        if let Some(saved) = lock(&self.store).get(&key) {
+            windows.extend(keep_out_of_sight(
+                &saved.windows,
+                &windows,
+                &platform::existing_windows(),
+            ));
+        }
         let icons = if platform::SUPPORTS_ICONS && settings.restore_desktop_icons {
             platform::desktop_icons()
         } else {
@@ -431,6 +439,22 @@ impl Engine {
     }
 }
 
+/// Saved windows that still exist but that Mooring can't see right now: on
+/// another macOS Space, for example. Keeping them means their spot isn't
+/// forgotten, so a restore can put them back once they're in view.
+fn keep_out_of_sight(
+    saved: &[WindowState],
+    seen: &[WindowState],
+    existing: &HashSet<u64>,
+) -> Vec<WindowState> {
+    let seen: HashSet<u64> = seen.iter().map(|w| w.id).collect();
+    saved
+        .iter()
+        .filter(|w| w.id != 0 && !seen.contains(&w.id) && existing.contains(&w.id))
+        .cloned()
+        .collect()
+}
+
 /// A short app name: on Windows `app` is the program's full path.
 fn app_name(app: &str) -> &str {
     let name = app.rsplit(['\\', '/']).next().unwrap_or(app);
@@ -452,4 +476,45 @@ fn describe_restore(r: &RestoreReport) -> String {
         text.push_str(&format!("; {} couldn't be moved", r.failed));
     }
     text
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::WinState;
+
+    fn win(id: u64) -> WindowState {
+        WindowState {
+            id,
+            pid: 1,
+            app: "a".into(),
+            title: format!("w{id}"),
+            class: "c".into(),
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            state: WinState::Normal,
+            order: 0,
+        }
+    }
+
+    #[test]
+    fn keeps_only_saved_windows_that_exist_out_of_sight() {
+        let saved = vec![win(1), win(2), win(3), win(0)];
+        let seen = vec![win(1)];
+        // 2 is on another Space; 3 was closed; 0 has no id.
+        let existing: HashSet<u64> = [1, 2].into_iter().collect();
+        let kept = keep_out_of_sight(&saved, &seen, &existing);
+        assert_eq!(kept.iter().map(|w| w.id).collect::<Vec<_>>(), vec![2]);
+    }
+
+    #[test]
+    fn app_names_drop_the_path_and_exe() {
+        assert_eq!(
+            app_name(r"C:\Program Files\Microsoft Office\OUTLOOK.EXE"),
+            "OUTLOOK"
+        );
+        assert_eq!(app_name("Notes"), "Notes");
+    }
 }

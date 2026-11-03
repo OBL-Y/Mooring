@@ -86,6 +86,8 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 
 - macOS doesn't let apps place desktop icons, so the icon option only exists on Windows.
 - Full-screen macOS windows have their own Space, so Mooring leaves them alone.
+- Windows on other virtual desktops (Windows) are restored in place on their own desktop. Mooring can't move windows from one desktop to another: Windows only lets apps do that with their own windows.
+- On macOS, Mooring can only reach windows on the Space you're looking at. Windows on other Spaces keep their saved spot and are put back when you switch to that Space within 30 minutes of a restore (with **Place apps opened later** on). Moving windows between Spaces isn't possible without turning off System Integrity Protection.
 - On Windows, windows of apps running as administrator can't be moved unless Mooring also runs as administrator.
 - A window that was closed and reopened gets its old spot back only if its app and title (or its app) match what was saved.
 - Updates come from full releases only. Beta (pre-release) builds don't update themselves; install the next beta by hand.
