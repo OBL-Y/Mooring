@@ -2218,6 +2218,7 @@ dependencies = [
  "tauri-plugin-single-instance",
  "tauri-plugin-updater",
  "windows 0.61.3",
+ "zip",
 ]
 
 [[package]]
@@ -5518,6 +5519,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e408c6cc4699dd017d53dc080cd51c2cea2b5354af57a1479bd265ed42911487"
 dependencies = [
  "crc32fast",
+ "flate2",
  "getrandom 0.4.3",
  "indexmap 2.14.2",
  "libc",

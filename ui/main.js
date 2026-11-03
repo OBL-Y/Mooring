@@ -160,6 +160,9 @@ $("restore").onclick = () =>
     r.moved ? `Restored ${r.moved} windows` : "Windows are already in place");
 $("save").onclick = () => run($("save"), "save_now", (n) => `Saved ${n} windows`);
 $("grant").onclick = () => invoke("request_permission");
+$("diagnostics").onclick = () =>
+  run($("diagnostics"), "export_diagnostics", (path) =>
+    `Saved ${path.split(/[\\/]/).pop()} to Downloads`);
 $("open-login-items").onclick = () => invoke("open_login_items");
 $("update-banner-install").onclick = installUpdate;
 $("update-action").onclick = async () => {

@@ -1,3 +1,4 @@
+mod diagnostics;
 mod engine;
 mod login;
 mod model;
@@ -149,6 +150,18 @@ fn request_permission() {
 }
 
 #[tauri::command]
+async fn export_diagnostics(
+    app: AppHandle,
+    engine: State<'_, Arc<Engine>>,
+) -> Result<String, String> {
+    let engine = Arc::clone(&engine);
+    tauri::async_runtime::spawn_blocking(move || diagnostics::export(&app, &engine))
+        .await
+        .map_err(|e| e.to_string())?
+        .map(|path| path.display().to_string())
+}
+
+#[tauri::command]
 fn open_login_items() {
     login::open_settings();
 }
@@ -200,6 +213,13 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
         None::<&str>,
     )?;
     let update = MenuItem::with_id(app, "update", "Check for Updates…", true, None::<&str>)?;
+    let diagnostics = MenuItem::with_id(
+        app,
+        "diagnostics",
+        "Export Diagnostics…",
+        true,
+        None::<&str>,
+    )?;
     let settings = MenuItem::with_id(app, "settings", "Settings…", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "Quit Mooring", true, None::<&str>)?;
     let menu = Menu::with_items(
@@ -212,6 +232,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
             &launch_at_login,
             &PredefinedMenuItem::separator(app)?,
             &update,
+            &diagnostics,
             &settings,
             &quit,
         ],
@@ -273,6 +294,14 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
                             let _ = updater::install(&app).await;
                         } else {
                             run_update_check(&app, false).await;
+                        }
+                    });
+                }
+                "diagnostics" => {
+                    let app = app.clone();
+                    std::thread::spawn(move || {
+                        if let Err(e) = diagnostics::export(&app, &engine) {
+                            log::error!("could not export diagnostics: {e}");
                         }
                     });
                 }
@@ -366,6 +395,7 @@ pub fn run() {
             forget_layout,
             request_permission,
             open_login_items,
+            export_diagnostics,
             get_update,
             check_update,
             install_update,
