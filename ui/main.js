@@ -23,6 +23,7 @@ async function loadSettings() {
     if (el.type === "checkbox") el.checked = !!settings[f];
     else el.value = String(settings[f]);
   }
+  $("login-approval").hidden = !settings.login_needs_approval;
 }
 
 async function saveSettings() {
@@ -159,6 +160,7 @@ $("restore").onclick = () =>
     r.moved ? `Restored ${r.moved} windows` : "Windows are already in place");
 $("save").onclick = () => run($("save"), "save_now", (n) => `Saved ${n} windows`);
 $("grant").onclick = () => invoke("request_permission");
+$("open-login-items").onclick = () => invoke("open_login_items");
 $("update-banner-install").onclick = installUpdate;
 $("update-action").onclick = async () => {
   if ($("update-action").textContent.startsWith("Install")) return installUpdate();

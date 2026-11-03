@@ -43,7 +43,10 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "minimumSystemVersion": "11.0"
+      "minimumSystemVersion": "13.0",
+      "files": {
+        "Library/LaunchAgents/io.github.obl-y.mooring.login.plist": "./macos/io.github.obl-y.mooring.login.plist"
+      }
     },
     "windows": {
       "nsis": {

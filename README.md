@@ -93,10 +93,12 @@ To restore desktop icons, right-click the desktop › View and turn off **Auto a
 
 ### macOS
 
+Needs macOS 13 (Ventura) or later.
+
 1. Open `Mooring_x.y.z_universal.dmg` and drag Mooring to Applications.
 2. Open Mooring. Until builds are notarized, macOS will say it can't check the app. Go to **System Settings › Privacy & Security**, scroll down, and click **Open Anyway**. You only need to do this once.
 3. When asked, turn Mooring on under **System Settings › Privacy & Security › Accessibility**. Moving other apps' windows isn't possible without this.
-4. To have Mooring start when you log in, check **System Settings › General › Login Items & Extensions** and make sure Mooring is on under **Allow in the Background**. macOS shows a notification when Mooring adds itself there, and it's easy to dismiss without allowing it.
+4. Mooring sets itself to open at login, and macOS shows a notification saying a login item was added. If you've turned it off in **System Settings › General › Login Items & Extensions**, Mooring's Settings shows **macOS needs your OK** with a button that takes you there; turn Mooring on under **Allow in the Background**.
 
 Mooring lives in the menu bar as an anchor icon. Closing its window doesn't quit it; use **Quit Mooring** from the icon's menu. If you can't see the icon, check **System Settings › Menu Bar**, and on MacBooks with a notch, make room by ⌘-dragging other icons out of the menu bar.
 
@@ -120,7 +122,7 @@ Open Settings from the tray or menu bar icon, or launch Mooring again (for examp
 - On Windows, windows of apps running as administrator can't be moved unless Mooring also runs as administrator.
 - A window that was closed and reopened gets its old spot back only if its app and title (or its app) match what was saved.
 - Updates come from full releases only. Beta (pre-release) builds don't update themselves; install the next beta by hand.
-- Until the Mac build is signed with a Developer ID, macOS may forget Mooring's Accessibility access after an update. Turn it off and on again in System Settings › Privacy & Security › Accessibility.
+- Mac builds are signed with Mooring's own certificate, not yet an Apple Developer ID. macOS keeps Accessibility access across updates, but the first install needs **Open Anyway**.
 
 ## How it works
 
@@ -138,7 +140,7 @@ How each OS does it:
 | Screens | `EnumDisplayMonitors`, with EDID-based ids from `EnumDisplayDevices` | `CGGetActiveDisplayList` |
 | Reading and moving windows | `EnumWindows`, `GetWindowPlacement`, `SetWindowPlacement` | Accessibility API (`AXUIElement`) |
 | Desktop icons | The desktop's `IFolderView` (shell COM) | Not possible |
-| Run at login | Per-user `Run` registry key | LaunchAgent |
+| Run at login | Per-user `Run` registry key | Launch agent inside the app, registered with `SMAppService` |
 | Installer | NSIS (per-user or per-machine) | DMG |
 
 ### Project layout
@@ -187,7 +189,9 @@ Every release includes signed update files and a `latest.json`. The app checks `
 
 The update files are signed with a private key that must be set as the repository secret `TAURI_SIGNING_PRIVATE_KEY` (with `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` if the key has a password). Without it, the Release workflow fails. The matching public key is in `src-tauri/tauri.conf.json`. Keep a backup of the private key somewhere safe: if it's lost, existing installs can't be updated and people have to reinstall by hand.
 
-To sign the Mac build, add these repository secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and `APPLE_TEAM_ID`. For Windows signing, see the [Tauri Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
+Mac builds are signed with Mooring's own self-signed certificate ("Mooring Code Signing"), from the repository secrets `MAC_SIGNING_CERTIFICATE` (the `.p12` file, base64-encoded) and `MAC_SIGNING_CERTIFICATE_PASSWORD`. Because every build carries the same signature, macOS keeps Mooring's Accessibility and login-item approval when it updates. Keep a backup of the certificate: a new one means everyone has to allow Accessibility again once.
+
+To sign and notarize with an Apple Developer ID instead (which also removes the **Open Anyway** step), add these repository secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and `APPLE_TEAM_ID`. For Windows signing, see the [Tauri Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
 
 ## License
 

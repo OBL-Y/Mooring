@@ -1,4 +1,5 @@
 mod engine;
+mod login;
 mod model;
 mod platform;
 mod settings;
@@ -13,11 +14,9 @@ use std::time::Duration;
 use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Manager, State, WindowEvent, Wry};
-use tauri_plugin_autostart::{MacosLauncher, ManagerExt};
 use updater::{UpdateView, Updates};
 
-/// Passed by the login item / startup entry so Mooring starts quietly in the tray.
-const AUTOSTART_ARG: &str = "--autostart";
+use login::AUTOSTART_ARG;
 
 /// How long after start-up to wait before the first update check, so the network is up.
 const FIRST_UPDATE_CHECK: Duration = Duration::from_secs(15);
@@ -35,6 +34,9 @@ struct SettingsView {
     #[serde(flatten)]
     settings: Settings,
     launch_at_login: bool,
+    /// macOS only: the login item is registered but turned off in System Settings.
+    #[serde(default)]
+    login_needs_approval: bool,
 }
 
 /// Tray items that change, kept so the settings window and the tray stay in sync.
@@ -47,7 +49,8 @@ struct TrayChecks {
 fn settings_view(app: &AppHandle, engine: &Engine) -> SettingsView {
     SettingsView {
         settings: engine.settings(),
-        launch_at_login: app.autolaunch().is_enabled().unwrap_or(false),
+        launch_at_login: login::is_enabled(app),
+        login_needs_approval: login::needs_approval(app),
     }
 }
 
@@ -87,13 +90,7 @@ async fn run_update_check(app: &AppHandle, announce: bool) {
 }
 
 fn set_launch_at_login(app: &AppHandle, enabled: bool) -> Result<(), String> {
-    let autolaunch = app.autolaunch();
-    let result = if enabled {
-        autolaunch.enable()
-    } else {
-        autolaunch.disable()
-    };
-    result.map_err(|e| e.to_string())
+    login::set(app, enabled)
 }
 
 #[tauri::command]
@@ -107,7 +104,7 @@ fn update_settings(
     engine: State<'_, Arc<Engine>>,
     view: SettingsView,
 ) -> Result<SettingsView, String> {
-    if app.autolaunch().is_enabled().unwrap_or(false) != view.launch_at_login {
+    if login::is_enabled(&app) != view.launch_at_login {
         set_launch_at_login(&app, view.launch_at_login)?;
     }
     engine.set_settings(view.settings)?;
@@ -149,6 +146,11 @@ fn forget_layout(engine: State<'_, Arc<Engine>>, key: String) -> bool {
 #[tauri::command]
 fn request_permission() {
     platform::request_permission();
+}
+
+#[tauri::command]
+fn open_login_items() {
+    login::open_settings();
 }
 
 #[tauri::command]
@@ -256,7 +258,7 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
                     sync_tray(app);
                 }
                 "login" => {
-                    let enabled = app.autolaunch().is_enabled().unwrap_or(false);
+                    let enabled = login::is_enabled(app);
                     if let Err(e) = set_launch_at_login(app, !enabled) {
                         log::error!("could not change login item: {e}");
                     }
@@ -285,15 +287,17 @@ fn build_tray(app: &AppHandle) -> tauri::Result<()> {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        // Must be first: a second launch (e.g. the desktop icon) just opens Settings.
-        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+    // Must be first: a second launch (e.g. the desktop icon) just opens Settings.
+    let builder =
+        tauri::Builder::default().plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             show_settings(app)
-        }))
-        .plugin(tauri_plugin_autostart::init(
-            MacosLauncher::LaunchAgent,
-            Some(vec![AUTOSTART_ARG]),
-        ))
+        }));
+    #[cfg(windows)]
+    let builder = builder.plugin(tauri_plugin_autostart::init(
+        tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+        Some(vec![AUTOSTART_ARG]),
+    ));
+    builder
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(
             tauri_plugin_log::Builder::new()
@@ -313,6 +317,8 @@ pub fn run() {
                     log::warn!("could not enable launch at login: {e}");
                 }
                 let _ = settings.save(&dir);
+            } else {
+                login::migrate(app.handle());
             }
 
             let engine = Engine::new(dir, settings);
@@ -359,6 +365,7 @@ pub fn run() {
             set_pinned,
             forget_layout,
             request_permission,
+            open_login_items,
             get_update,
             check_update,
             install_update,

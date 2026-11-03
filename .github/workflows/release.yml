@@ -34,9 +34,11 @@ jobs:
         with:
           workspaces: src-tauri
       - run: npm ci
-      # Sign and notarize with a Developer ID when the Apple secrets are set.
-      # Otherwise ad-hoc sign, so macOS offers "Open Anyway" instead of
-      # calling the app damaged. (Passing empty secrets makes the build fail.)
+      # Mac signing, best first:
+      # 1. Developer ID (APPLE_* secrets): signed and notarized, no Gatekeeper prompt.
+      # 2. Mooring's own certificate (MAC_SIGNING_* secrets): every build has the same
+      #    signature, so macOS keeps Accessibility and login-item approval across updates.
+      # 3. Ad-hoc, so macOS offers "Open Anyway" instead of calling the app damaged.
       - name: Set up macOS signing
         if: matrix.platform == 'macos-latest'
         shell: bash
@@ -47,15 +49,32 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          MAC_SIGNING_CERTIFICATE: ${{ secrets.MAC_SIGNING_CERTIFICATE }}
+          MAC_SIGNING_CERTIFICATE_PASSWORD: ${{ secrets.MAC_SIGNING_CERTIFICATE_PASSWORD }}
         run: |
           if [ -n "$APPLE_CERTIFICATE" ]; then
             for name in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_SIGNING_IDENTITY APPLE_ID APPLE_PASSWORD APPLE_TEAM_ID; do
               { echo "$name<<END_OF_$name"; printenv "$name"; echo "END_OF_$name"; } >> "$GITHUB_ENV"
             done
             echo "Signing with a Developer ID"
+          elif [ -n "$MAC_SIGNING_CERTIFICATE" ]; then
+            # Tauri only imports Apple-issued certificates, so load this one ourselves
+            # and let Tauri find it by name in the keychain search list.
+            keychain="$RUNNER_TEMP/mooring-signing.keychain-db"
+            keychain_password="$(openssl rand -hex 16)"
+            echo "$MAC_SIGNING_CERTIFICATE" | base64 --decode > "$RUNNER_TEMP/mooring.p12"
+            security create-keychain -p "$keychain_password" "$keychain"
+            security set-keychain-settings -lut 21600 "$keychain"
+            security unlock-keychain -p "$keychain_password" "$keychain"
+            security import "$RUNNER_TEMP/mooring.p12" -k "$keychain" -P "$MAC_SIGNING_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -s -k "$keychain_password" "$keychain" > /dev/null
+            security list-keychains -d user -s "$keychain" $(security list-keychains -d user | tr -d '"')
+            rm "$RUNNER_TEMP/mooring.p12"
+            echo "APPLE_SIGNING_IDENTITY=Mooring Code Signing" >> "$GITHUB_ENV"
+            echo "Signing with Mooring's own certificate"
           else
             echo "APPLE_SIGNING_IDENTITY=-" >> "$GITHUB_ENV"
-            echo "No Apple secrets set; ad-hoc signing"
+            echo "No signing secrets set; ad-hoc signing"
           fi
       - uses: tauri-apps/tauri-action@v0
         env:
