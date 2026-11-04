@@ -6,6 +6,8 @@ Mooring is a free, open-source app for **Windows and macOS** that puts your wind
 
 > **Status: v0.1.0, the first release.** It has been tested on real docking setups on Windows and macOS. Help is very welcome; see [Contributing](#contributing).
 
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20Mooring-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/obly)
+
 ## The problem
 
 When you undock a laptop, the OS piles every window onto the laptop screen. When you dock again, they stay there, and you drag them back by hand. Windows 11 tries to remember positions, but it doesn't always work. macOS doesn't try at all.
@@ -152,6 +154,14 @@ Bug reports, testing on your own dock setup, and pull requests are all welcome. 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
 
 Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). To report a security problem, see [SECURITY.md](SECURITY.md) rather than opening an issue.
+
+## Support Mooring
+
+Mooring is free and always will be. If it saves you dragging windows around every morning, you can say thanks with a coffee. It helps cover the time spent testing on real docks and, one day, the cost of signing the installers.
+
+<a href="https://buymeacoffee.com/obly"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" height="50"></a>
+
+Reporting bugs, testing on your own setup and spreading the word help just as much.
 
 ## Releasing
 
