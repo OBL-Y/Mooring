@@ -1,5 +1,11 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Ask a question
+    url: https://github.com/OBL-Y/Mooring/discussions/categories/q-a
+    about: Help with setting up or using Mooring. Issues are for things that are broken.
+  - name: Share an idea
+    url: https://github.com/OBL-Y/Mooring/discussions/categories/ideas
+    about: Talk through an idea before it becomes a feature request.
   - name: Contributing guide
     url: https://github.com/OBL-Y/Mooring/blob/main/CONTRIBUTING.md
     about: How to report bugs well, set up the code, and open a pull request.

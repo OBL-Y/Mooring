@@ -137,7 +137,7 @@ scripts/winget-manifests.sh, homebrew-cask.sh  Package manager files for a relea
 
 ## Contributing
 
-Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to try Mooring with your own dock and open an issue with what happened.
+Bug reports, testing on your own dock setup, and pull requests are all welcome. The fastest way to help right now is to try Mooring with your own dock and open an issue with what happened. Questions, ideas and setups you've tested go in [Discussions](https://github.com/OBL-Y/Mooring/discussions).
 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
 

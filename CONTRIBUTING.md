@@ -18,9 +18,13 @@ The most useful thing right now is testing on real hardware. Try Mooring with yo
 
 If it's about where windows ended up, the saved layouts help too: `layouts.json` in `%APPDATA%\io.github.obl-y.mooring` (Windows) or `~/Library/Application Support/io.github.obl-y.mooring` (macOS). It includes window titles, so check it for anything private before attaching it.
 
+## Asking a question
+
+For help setting up or using Mooring, ask in [Discussions › Q&A](https://github.com/OBL-Y/Mooring/discussions/categories/q-a) rather than opening an issue. Issues are for things that are broken.
+
 ## Suggesting a feature
 
-Check the [Roadmap](README.md#roadmap) first. If your idea isn't there, [open a feature request](https://github.com/OBL-Y/Mooring/issues/new?template=feature_request.yml) that says what problem it solves for you. That's easier to discuss than a finished design.
+Check the [Roadmap](README.md#roadmap) first. If your idea isn't there, start a conversation in [Discussions › Ideas](https://github.com/OBL-Y/Mooring/discussions/categories/ideas), or [open a feature request](https://github.com/OBL-Y/Mooring/issues/new?template=feature_request.yml) that says what problem it solves for you. That's easier to discuss than a finished design.
 
 ## Working on the code
 
