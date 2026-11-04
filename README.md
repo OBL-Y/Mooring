@@ -35,7 +35,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 
 ## Install
 
-Download the installer for your system from the [latest release](https://github.com/OBL-Y/Mooring/releases/latest).
+Download the installer for your system from the [latest release](https://github.com/OBL-Y/Mooring/releases/latest). See the [code signing policy](#code-signing-policy) for how releases are built and signed.
 
 You'll soon also be able to install with a package manager:
 
@@ -171,6 +171,29 @@ The update files are signed with a private key that must be set as the repositor
 Mac builds are signed with Mooring's own self-signed certificate ("Mooring Code Signing"), from the repository secrets `MAC_SIGNING_CERTIFICATE` (the `.p12` file, base64-encoded) and `MAC_SIGNING_CERTIFICATE_PASSWORD`. Because every build carries the same signature, macOS keeps Mooring's Accessibility and login-item approval when it updates. Keep a backup of the certificate: a new one means everyone has to allow Accessibility again once.
 
 To sign and notarize with an Apple Developer ID instead (which also removes the **Open Anyway** step), add these repository secrets: `APPLE_CERTIFICATE`, `APPLE_CERTIFICATE_PASSWORD`, `APPLE_SIGNING_IDENTITY`, `APPLE_ID`, `APPLE_PASSWORD` and `APPLE_TEAM_ID`. For Windows signing, see the [Tauri Windows signing guide](https://v2.tauri.app/distribute/sign/windows/).
+
+## Privacy
+
+Mooring collects no personal data: no analytics, no tracking, no accounts. Its layouts, settings and logs stay on your computer, and its only network connection is the update check to this project's GitHub Releases, which you can turn off. The details are in the [privacy policy](PRIVACY.md).
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
+- **Windows** installers are signed through SignPath Foundation, starting with the first release after the project's approval. Earlier releases are unsigned.
+- **macOS** builds are signed with the project's own certificate ("Mooring Code Signing"); see [Releasing](#releasing).
+
+How releases are made:
+
+- Every release is built by GitHub Actions ([release.yml](.github/workflows/release.yml)) from a tag in this repository. Nothing is built or signed on a personal computer.
+- Only code merged into `main` is released. Changes from anyone outside the team arrive as pull requests and are reviewed before merging.
+
+Team roles:
+
+- **Committers and reviewers:** [OBL-Y](https://github.com/OBL-Y)
+- **Approvers** (who approve each signing request): [OBL-Y](https://github.com/OBL-Y)
+
+Mooring's [privacy policy](PRIVACY.md) explains the one network connection it makes (the update check) and what stays on your computer.
 
 ## License
 

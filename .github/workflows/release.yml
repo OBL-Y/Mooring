@@ -85,7 +85,10 @@ jobs:
         with:
           tagName: ${{ github.ref_type == 'tag' && github.ref_name || '' }}
           releaseName: Mooring ${{ github.ref_name }}
-          releaseBody: See the assets below to download and install Mooring.
+          releaseBody: |
+            See the assets below to download and install Mooring.
+
+            [Code signing policy](https://github.com/OBL-Y/Mooring#code-signing-policy) · [Privacy policy](https://github.com/OBL-Y/Mooring/blob/main/PRIVACY.md)
           # Test tags like v0.1.0-beta.1 publish straight away as a pre-release;
           # version tags like v0.1.0 make a draft to check before publishing.
           releaseDraft: ${{ !contains(github.ref_name, '-') }}
