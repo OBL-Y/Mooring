@@ -8,6 +8,12 @@ Mooring is a free, open-source app for **Windows and macOS** that puts your wind
 
 [![Buy Me a Coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee-support%20Mooring-FFDD00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/obly)
 
+<p align="center">
+  <img src="docs/images/demo-mac.gif" width="49%" alt="Animation on macOS: a laptop docked to a monitor, its windows moving to the laptop screen when undocked and back to the monitor when redocked">
+  <img src="docs/images/demo-windows.gif" width="49%" alt="The same animation on Windows: windows move to the laptop when undocked and Mooring puts them back on the monitor when redocked">
+</p>
+<p align="center"><sub>macOS (left) and Windows (right)</sub></p>
+
 ## The problem
 
 When you undock a laptop, the OS piles every window onto the laptop screen. When you dock again, they stay there, and you drag them back by hand. Windows 11 tries to remember positions, but it doesn't always work. macOS doesn't try at all.
