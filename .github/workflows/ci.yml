@@ -16,7 +16,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest]
+        # Intel Macs: GitHub's Apple Silicon runners are often short in the
+        # afternoon (UK) and jobs get cancelled unstarted. The checks are the
+        # same on either. Release builds stay on macos-latest.
+        os: [macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
