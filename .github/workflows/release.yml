@@ -23,8 +23,8 @@ jobs:
             args: ""
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: lts/*
       - uses: dtolnay/rust-toolchain@stable
@@ -76,7 +76,7 @@ jobs:
             echo "APPLE_SIGNING_IDENTITY=-" >> "$GITHUB_ENV"
             echo "No signing secrets set; ad-hoc signing"
           fi
-      - uses: tauri-apps/tauri-action@v0
+      - uses: tauri-apps/tauri-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Signs the update files and latest.json that the in-app updater downloads.
