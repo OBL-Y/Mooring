@@ -30,4 +30,4 @@ in scope, for example:
   ship a modified Mooring.
 
 Unsigned installers (SmartScreen and Gatekeeper warnings) are a known gap, not a
-vulnerability; see the README's roadmap.
+vulnerability; the README's install steps explain them.
