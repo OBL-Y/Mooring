@@ -42,11 +42,19 @@ the OBL-Y fork.
 Tap: [OBL-Y/homebrew-mooring](https://github.com/OBL-Y/homebrew-mooring).
 People install it with:
 
+```bash
+brew tap obl-y/mooring
 ```
+
+```bash
+brew trust obl-y/mooring
+```
+
+```bash
 brew install --cask obl-y/mooring/mooring
 ```
 
-(If Homebrew says the tap isn't trusted, run `brew trust obl-y/mooring` first.)
+Homebrew only loads casks from taps you've trusted, which is what `brew trust` does.
 
 Homebrew's main cask collection only accepts apps notarized by Apple, which
 needs a paid Apple Developer ID; hence our own tap. The cask tells people

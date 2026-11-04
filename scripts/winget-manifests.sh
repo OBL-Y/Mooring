@@ -17,7 +17,7 @@ sha="$(shasum -a 256 "$tmp/$installer" | cut -d' ' -f1 | tr 'a-f' 'A-F')"
 
 dir="$out/manifests/o/OBL-Y/Mooring/$version"
 mkdir -p "$dir"
-schema="1.10.0"
+schema="1.12.0"
 
 cat > "$dir/OBL-Y.Mooring.yaml" <<YAML
 # yaml-language-server: \$schema=https://aka.ms/winget-manifest.version.$schema.schema.json

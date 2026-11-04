@@ -37,10 +37,22 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 
 Download the installer for your system from the [latest release](https://github.com/OBL-Y/Mooring/releases/latest). See the [code signing policy](#code-signing-policy) for how releases are built and signed.
 
-You'll soon also be able to install with a package manager:
+Or install with a package manager:
+
+**Windows** (once it's accepted into winget):
 
 ```bash
 winget install OBL-Y.Mooring
+```
+
+**macOS** (Homebrew tap; `brew trust` is needed because the tap isn't part of Homebrew itself):
+
+```bash
+brew tap obl-y/mooring
+```
+
+```bash
+brew trust obl-y/mooring
 ```
 
 ```bash
