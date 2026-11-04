@@ -4,7 +4,7 @@ A boat moors at a dock and returns to the same spot, which is what your windows 
 
 Mooring is a free, open-source app for **Windows and macOS** that puts your windows back where they were when you plug your laptop into a dock or unplug it. On Windows it also puts desktop icons back in the order you left them.
 
-> **Status: early development (v0.1, not yet released).** It has been tested on real docking setups on Windows and macOS. See the [Roadmap](#roadmap) for what's left before a first release. Help is very welcome; see [Contributing](#contributing).
+> **Status: v0.1.0, the first release.** It has been tested on real docking setups on Windows and macOS. Help is very welcome; see [Contributing](#contributing).
 
 ## The problem
 
@@ -36,7 +36,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
   - [ ] Apply to SignPath Foundation with this repo (needs multi-factor login on GitHub and SignPath).
   - [ ] Once approved, add SignPath's GitHub Action to the release workflow so it signs the Windows build.
   - Until then, Windows releases ship unsigned, and testers click **More info › Run anyway**.
-- [ ] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
+- [x] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
 - [ ] Make the repo public, then publish to winget and the Homebrew tap (one-time setup in [packaging/README.md](packaging/README.md)).
 
 ### Later
@@ -45,9 +45,9 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 
 ## Install
 
-There's no release yet. Once there is, installers will be on the [Releases](https://github.com/OBL-Y/Mooring/releases) page.
+Download the installer for your system from the [latest release](https://github.com/OBL-Y/Mooring/releases/latest).
 
-After the first release, you'll also be able to install with a package manager:
+You'll soon also be able to install with a package manager:
 
 ```bash
 winget install OBL-Y.Mooring
@@ -151,7 +151,7 @@ Bug reports, testing on your own dock setup, and pull requests are all welcome. 
 
 [CONTRIBUTING.md](CONTRIBUTING.md) explains what to put in a bug report, how to set up the tools, run Mooring from source, and check your change before opening a pull request.
 
-Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+Everyone taking part is expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md). To report a security problem, see [SECURITY.md](SECURITY.md) rather than opening an issue.
 
 ## Releasing
 
