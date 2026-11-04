@@ -1,0 +1,69 @@
+name: Publish to package managers
+
+# When a release is published (not a pre-release), send the new version to
+# winget and the Homebrew tap. Each job does nothing until its token secret is
+# set; see packaging/README.md for the one-time setup.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to publish, e.g. v0.1.0
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  TAG: ${{ github.event.release.tag_name || inputs.tag }}
+
+jobs:
+  winget:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: windows-latest
+    env:
+      WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
+    steps:
+      - name: Skip until set up
+        if: env.WINGET_TOKEN == ''
+        run: echo "WINGET_TOKEN isn't set; not submitting to winget."
+      # Opens a pull request on microsoft/winget-pkgs from a fork under OBL-Y.
+      # Only works once the first version has been accepted there.
+      - uses: vedantmgoyal9/winget-releaser@v2
+        if: env.WINGET_TOKEN != ''
+        with:
+          identifier: OBL-Y.Mooring
+          installers-regex: '_x64-setup\.exe$'
+          release-tag: ${{ env.TAG }}
+          token: ${{ secrets.WINGET_TOKEN }}
+
+  homebrew:
+    if: ${{ !github.event.release.prerelease }}
+    runs-on: ubuntu-latest
+    env:
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Skip until set up
+        if: env.HOMEBREW_TAP_TOKEN == ''
+        run: echo "HOMEBREW_TAP_TOKEN isn't set; not updating the Homebrew tap."
+      - uses: actions/checkout@v5
+        if: env.HOMEBREW_TAP_TOKEN != ''
+      - uses: actions/checkout@v5
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        with:
+          repository: OBL-Y/homebrew-mooring
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+      - name: Update the cask
+        if: env.HOMEBREW_TAP_TOKEN != ''
+        run: |
+          scripts/homebrew-cask.sh "$TAG" tap
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/mooring.rb
+          git diff --cached --quiet && { echo "Cask already up to date"; exit 0; }
+          git commit -m "Mooring ${TAG#v}"
+          git push

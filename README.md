@@ -37,6 +37,7 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
   - [ ] Once approved, add SignPath's GitHub Action to the release workflow so it signs the Windows build.
   - Until then, Windows releases ship unsigned, and testers click **More info › Run anyway**.
 - [ ] Publish the first release: tag `v0.1.0`, check the draft release, then publish it.
+- [ ] Make the repo public, then publish to winget and the Homebrew tap (one-time setup in [packaging/README.md](packaging/README.md)).
 
 ### Later
 
@@ -45,6 +46,16 @@ When you undock a laptop, the OS piles every window onto the laptop screen. When
 ## Install
 
 There's no release yet. Once there is, installers will be on the [Releases](https://github.com/OBL-Y/Mooring/releases) page.
+
+After the first release, you'll also be able to install with a package manager:
+
+```bash
+winget install OBL-Y.Mooring
+```
+
+```bash
+brew install --cask obl-y/mooring/mooring
+```
 
 ### Windows
 
@@ -130,6 +141,7 @@ src-tauri/
 ui/                    Settings window (plain HTML, CSS, JS, no build step)
 scripts/make-icon.swift  Draws the app and tray icons
 scripts/screenshot.swift Renders the Settings screenshots in docs/images
+scripts/winget-manifests.sh, homebrew-cask.sh  Package manager files for a release (see packaging/README.md)
 .github/workflows/     CI (tests on both OSes) and Release (builds installers)
 ```
 
