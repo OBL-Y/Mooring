@@ -48,9 +48,9 @@ jobs:
       - name: Skip until set up
         if: env.HOMEBREW_TAP_TOKEN == ''
         run: echo "HOMEBREW_TAP_TOKEN isn't set; not updating the Homebrew tap."
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: env.HOMEBREW_TAP_TOKEN != ''
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         if: env.HOMEBREW_TAP_TOKEN != ''
         with:
           repository: OBL-Y/homebrew-mooring
